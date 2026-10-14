@@ -293,6 +293,12 @@
 
     </main>
 
+    <script>
+      // Replace these placeholder values with your Firebase web app config from Firebase Console.
+      // You can find it under Project settings -> Your apps -> Web app -> SDK setup and configuration.
+      window.__firebase_config = '{"apiKey":"YOUR_API_KEY","authDomain":"YOUR_PROJECT_ID.firebaseapp.com","projectId":"YOUR_PROJECT_ID","storageBucket":"YOUR_PROJECT_ID.appspot.com","messagingSenderId":"YOUR_SENDER_ID","appId":"YOUR_APP_ID"}';
+    </script>
+
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -607,10 +613,10 @@
                                 </div>
                             </div>
                             <div class="flex gap-2 ml-2">
-                                <button onclick="app.copyApprovalLink('${chore.id}', ${chore.points})" class="glass-button bg-purple-500/30 hover:bg-purple-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center transition-all text-sm font-bold shadow-lg" title="Copy Approval Link for Parent">
+                                <button onclick="app.copyApprovalLink('${chore.id}', ${chore.points})" class="glass-button bg-purple-500/30 hover:bg-purple-500/60 text-white p-2 px-4 rounded-xl flex items-center gap-2">
                                     <i class="fas fa-link mr-2"></i> Copy Link
                                 </button>
-                                <button onclick="app.approveChore('${chore.id}', ${chore.points})" class="glass-button bg-blue-500/30 hover:bg-blue-500/60 text-white p-2 px-3 rounded-xl flex items-center justify-center transition-all text-sm font-bold shadow-lg" title="Manual Approve (For testing)">
+                                <button onclick="app.approveChore('${chore.id}', ${chore.points})" class="glass-button bg-blue-500/30 hover:bg-blue-500/60 text-white p-2 px-3 rounded-xl flex items-center justify-center">
                                     <i class="fas fa-check-double"></i>
                                 </button>
                             </div>
@@ -621,7 +627,7 @@
                                 <h4 class="text-lg font-semibold">${chore.title}</h4>
                                 <p class="text-sm text-yellow-300 font-bold">${chore.points} pts</p>
                             </div>
-                            <button onclick="app.completeChore('${chore.id}', '${chore.title.replace(/'/g, "\\'")}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-full flex items-center justify-center transition-all group" title="Finish Chore">
+                            <button onclick="app.completeChore('${chore.id}', '${chore.title.replace(/'/g, "\\'")}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-xl flex items-center justify-center">
                                 <i class="fas fa-check text-xl group-hover:scale-125 transition-transform"></i>
                             </button>
                         `;
@@ -722,7 +728,7 @@
                 btn.disabled = true;
 
                 try {
-                    const prompt = "Act as an expert in child psychology and gamification. Suggest 3 fun, slightly unconventional, and highly engaging household chores for kids to do. Return ONLY a valid JSON array of objects. Each object must have 'title' (string, max 5 words) and 'points' (number between 10 and 50). Do not wrap in markdown or backticks, just raw JSON.";
+                    const prompt = "Act as an expert in child psychology and gamification. Suggest 3 fun, slightly unconventional, and highly engaging household chores for kids to do. Return ONLY a valid JSON array of objects with 'title' and 'points' fields. Use point values between 20 and 200.";
                     
                     const payload = {
                         contents: [{ parts: [{ text: prompt }] }],
