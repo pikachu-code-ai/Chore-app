@@ -27,7 +27,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        .glass { background: rgba(255,255,255,0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 8px 32px 0 rgba(0,0,0,0.1); border-radius: 1rem; }
+        .glass { background: rgba(255,255,255,0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 8px 32px 0 rgba(0,0,0,0.1); }
         .glass-panel { background: rgba(0,0,0,0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); }
         .glass-button { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); transition: all 0.3s ease; }
         .glass-button:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
@@ -129,7 +129,9 @@
                     <div class="glass-panel rounded-2xl p-6 bg-gradient-to-br from-indigo-600/30 to-purple-600/30 border-purple-400/40">
                         <h3 class="text-xl font-bold mb-2 flex items-center gap-2"><i class="fas fa-magic text-yellow-300"></i> AI Suggestions</h3>
                         <p class="text-sm text-gray-200 mb-4">Need ideas? Let Gemini suggest fun chores!</p>
-                        <button onclick="app.suggestChores()" id="btn-suggest-chores" class="w-full glass-button bg-white/20 hover:bg-white/30 rounded-xl py-3 font-bold flex justify-center items-center">Suggest Fun Chores</button>
+                        <button onclick="app.suggestChores()" id="btn-suggest-chores" class="w-full glass-button bg-white/20 hover:bg-white/30 rounded-xl py-3 font-bold flex justify-center items-center gap-3">
+                            <i class="fas fa-robot text-yellow-300"></i><span>Suggest Fun Chores</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -174,12 +176,21 @@
     </main>
 
     <script>
-      window.__firebase_config = '{"apiKey":"YOUR_API_KEY","authDomain":"YOUR_PROJECT_ID.firebaseapp.com","projectId":"YOUR_PROJECT_ID","storageBucket":"YOUR_PROJECT_ID.appspot.com","messagingSen[...]'}
+      // Paste your Firebase web config object here (from Firebase Console > Project settings).
+      // Replace the placeholder values with your project's real values.
+      window.__firebase_config = {
+        "apiKey": "REPLACE_WITH_YOUR_API_KEY",
+        "authDomain": "REPLACE_WITH_YOUR_PROJECT_ID.firebaseapp.com",
+        "projectId": "REPLACE_WITH_YOUR_PROJECT_ID",
+        "storageBucket": "REPLACE_WITH_YOUR_PROJECT_ID.appspot.com",
+        "messagingSenderId": "REPLACE_WITH_YOUR_SENDER_ID",
+        "appId": "REPLACE_WITH_YOUR_APP_ID"
+      };
     </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signInAnonymously, signOut as fbSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         window.app = {
@@ -201,50 +212,105 @@
                 { id: 'p6', title: 'Skip One Chore', cost: 300, icon: 'fa-forward-step', color: 'bg-teal-500' },
             ],
 
+            renderAuthControls() {
+                const userDisplay = document.getElementById('user-id-display');
+                if (!userDisplay) return;
+
+                let btn = document.getElementById('auth-button');
+                if (!btn) {
+                    btn = document.createElement('button');
+                    btn.id = 'auth-button';
+                    btn.className = 'ml-3 glass-button px-3 py-1 rounded-xl text-sm';
+                    userDisplay.parentNode.appendChild(btn);
+                }
+
+                if (!this.auth || !this.auth.currentUser) {
+                    btn.textContent = 'Sign in';
+                    btn.onclick = () => this.startSignIn();
+                } else {
+                    btn.textContent = 'Sign out';
+                    btn.onclick = () => this.signOut();
+                }
+            },
+
+            async startSignIn() {
+                if (!this.auth) return;
+                try {
+                    const provider = new GoogleAuthProvider();
+                    await signInWithPopup(this.auth, provider);
+                } catch (err) {
+                    console.error('Sign-in error:', err);
+                    // Optional fallback for local/dev: await signInAnonymously(this.auth);
+                }
+            },
+
+            async signOut() {
+                if (!this.auth) return;
+                try {
+                    await fbSignOut(this.auth);
+                    this.userId = null;
+                    document.getElementById('user-id-display').textContent = 'Signed out';
+                    this.renderAuthControls();
+                } catch (err) {
+                    console.error('Sign-out error:', err);
+                }
+            },
+
             async init() {
                 try {
-                    const firebaseConfig = JSON.parse(__firebase_config || '{}');
-                    if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'YOUR_API_KEY') {
-                        throw new Error('No real Firebase config available.');
+                    const firebaseConfig = window.__firebase_config || {};
+                    if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey.startsWith('REPLACE_')) {
+                        console.error('Firebase not configured. Please replace window.__firebase_config with your Firebase project config.');
+                        const overlay = document.getElementById('loading-overlay');
+                        if (overlay) {
+                            overlay.querySelector('p').textContent = 'App not configured with Firebase. See README to set up.';
+                            setTimeout(() => overlay.style.display = 'none', 2500);
+                        }
+                        return;
                     }
+
                     const firebaseApp = initializeApp(firebaseConfig);
                     this.db = getFirestore(firebaseApp);
                     this.auth = getAuth(firebaseApp);
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(this.auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(this.auth);
-                    }
-                    this.userId = this.auth.currentUser?.uid;
-                    if (!this.userId) throw new Error('Authentication failed.');
-                    document.getElementById('user-id-display').textContent = this.userId;
 
-                    const profileRef = doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'profile', 'data');
-                    const profileSnap = await getDoc(profileRef);
-                    if (!profileSnap.exists()) await setDoc(profileRef, { points: 0 });
+                    onAuthStateChanged(this.auth, async (user) => {
+                        if (user) {
+                            this.demo = false;
+                            this.userId = user.uid;
+                            document.getElementById('user-id-display').textContent = this.userId;
+                            this.renderAuthControls();
 
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const approveChoreId = urlParams.get('approve_chore');
-                    const approvePts = parseInt(urlParams.get('pts'));
-                    const targetUid = urlParams.get('uid');
+                            const profileRef = doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'profile', 'data');
+                            const profileSnap = await getDoc(profileRef);
+                            if (!profileSnap.exists()) await setDoc(profileRef, { points: 0 });
 
-                    // SECURITY: Do not auto-apply approvals via URL in production. Only allow this behavior in demo mode.
-                    if (approveChoreId && targetUid && !isNaN(approvePts)) {
-                        if (this.demo) {
-                            await this.handleParentApproval(approveChoreId, approvePts, targetUid);
-                            window.history.replaceState({}, document.title, window.location.pathname);
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const approveChoreId = urlParams.get('approve_chore');
+                            const approvePts = parseInt(urlParams.get('pts'));
+                            const targetUid = urlParams.get('uid');
+
+                            if (approveChoreId && targetUid && !isNaN(approvePts)) {
+                                await this.handleParentApproval(approveChoreId, approvePts, targetUid);
+                                window.history.replaceState({}, document.title, window.location.pathname);
+                            }
+
+                            this.setupListeners();
+                            this.renderPrizes();
+                            setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 800);
                         } else {
-                            console.warn('Approval via URL disabled in production for security. Use server-side approval flow.');
-                            this.showToast('Approval link detected but disabled for security. Please use secure approval flow.', 'error');
-                            window.history.replaceState({}, document.title, window.location.pathname);
+                            this.renderAuthControls();
+                            setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 800);
                         }
-                    }
-                    this.setupListeners();
-                    this.renderPrizes();
-                    setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 800);
+                    });
+
+                    this.renderAuthControls();
                 } catch (error) {
                     console.error('Init Error:', error);
-                    this.initDemoMode();
+                    const overlay = document.getElementById('loading-overlay');
+                    if (overlay) {
+                        overlay.querySelector('p').textContent = 'Initialization error. Check console for details.';
+                        setTimeout(() => overlay.style.display = 'none', 2000);
+                    }
                 }
             },
 
@@ -368,29 +434,18 @@
                 }).catch(() => this.showToast('Error sending approval request.', 'error'));
             },
 
-            async copyApprovalLink(choreId, points) {
+            copyApprovalLink(choreId, points) {
                 const url = new URL(window.location.href);
                 url.searchParams.set('approve_chore', choreId);
                 url.searchParams.set('pts', points);
                 url.searchParams.set('uid', this.userId);
-                try {
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                        await navigator.clipboard.writeText(url.toString());
-                        this.showToast('Approval link copied! Send it to your parent.', 'success');
-                    } else {
-                        // fallback
-                        const tempInput = document.createElement('input');
-                        tempInput.value = url.toString();
-                        document.body.appendChild(tempInput);
-                        tempInput.select();
-                        try { document.execCommand('copy'); this.showToast('Approval link copied! Send it to your parent.', 'success'); }
-                        catch { this.showToast('Failed to copy link.', 'error'); }
-                        document.body.removeChild(tempInput);
-                    }
-                } catch (e) {
-                    console.error('Clipboard error:', e);
-                    this.showToast('Failed to copy link. Please copy manually.', 'error');
-                }
+                const tempInput = document.createElement('input');
+                tempInput.value = url.toString();
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                try { document.execCommand('copy'); this.showToast('Approval link copied! Send it to your parent.', 'success'); }
+                catch { this.showToast('Failed to copy link.', 'error'); }
+                document.body.removeChild(tempInput);
             },
 
             async handleParentApproval(choreId, points, targetUid) {
@@ -438,8 +493,8 @@
                 }
                 if (!this.userId) return;
                 deleteDoc(doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'chores', choreId)).then(() => {
-                    updateDoc(doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'profile', 'data'), { points: this.points + points }).then(() => this.showToast(`Parent approved! Earned ${points} pts! 🎉`, 'success')).catch(() => this.showToast('Error approving chore.', 'error'));
-                }).catch(() => this.showToast('Error approving chore.', 'error')); 
+                    updateDoc(doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'profile', 'data'), { points: this.points + points }).then(() => this.showToast(`Parent approved! Earned ${points} pts! 🎉`, 'success')).catch(() => this.showToast('Error updating points', 'error'));
+                }).catch(() => this.showToast('Error approving chore.', 'error'));
             },
 
             saveParentEmail() {
@@ -458,44 +513,35 @@
             renderChores() {
                 const container = document.getElementById('chore-list-container');
                 if (!container) return;
-                if (!this.chores.length) { container.innerHTML = '<div class="text-center text-gray-300 py-10" id="no-chores-msg">No chores yet! Add some or ask AI for suggestions.</div>'; return; }
+                if (!this.chores.length) { container.innerHTML = '<div class="text-center text-gray-300 py-10" id="no-chores-msg">No chores yet! Add some or ask AI for suggestions.</div>'; return }
                 container.innerHTML = '';
                 this.chores.forEach(chore => {
                     const isPending = chore.status === 'pending_approval';
                     const el = document.createElement('div');
                     el.className = `glass-panel p-4 rounded-xl mb-4 flex justify-between items-center border-l-4 ${isPending ? 'border-orange-400 opacity-70' : 'border-yellow-400'}`;
-
-                    const left = document.createElement('div');
-
                     if (isPending) {
-                        const title = document.createElement('h4'); title.className = 'text-lg font-semibold text-gray-200 line-through'; title.textContent = chore.title;
-                        const meta = document.createElement('div'); meta.className = 'flex items-center gap-2 mt-1';
-                        const pts = document.createElement('p'); pts.className = 'text-sm text-yellow-300/50 font-bold'; pts.textContent = `${chore.points} pts`;
-                        const badge = document.createElement('span'); badge.className = 'text-[10px] uppercase font-bold tracking-wider bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded border border-orange-500/30'; badge.textContent = 'Pending';
-                        meta.appendChild(pts); meta.appendChild(badge);
-                        left.appendChild(title); left.appendChild(meta);
-
-                        const right = document.createElement('div'); right.className = 'flex gap-2 ml-2';
-
-                        const copyBtn = document.createElement('button'); copyBtn.className = 'glass-button bg-purple-500/30 hover:bg-purple-500/60 text-white p-2 px-4 rounded-xl font-bold'; copyBtn.textContent = 'Copy Link';
-                        copyBtn.addEventListener('click', () => this.copyApprovalLink(chore.id, chore.points));
-
-                        const approveBtn = document.createElement('button'); approveBtn.className = 'glass-button bg-blue-500/30 hover:bg-blue-500/60 text-white p-2 px-3 rounded-xl flex items-center'; approveBtn.textContent = 'Approve';
-                        approveBtn.addEventListener('click', () => this.approveChore(chore.id, chore.points));
-
-                        right.appendChild(copyBtn); right.appendChild(approveBtn);
-                        el.appendChild(left); el.appendChild(right);
+                        el.innerHTML = `
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-gray-200 line-through">${chore.title}</h4>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <p class="text-sm text-yellow-300/50 font-bold">${chore.points} pts</p>
+                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded border border-orange-500/30">Pending</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 ml-2">
+                                <button onclick="app.copyApprovalLink('${chore.id}', ${chore.points})" class="glass-button bg-purple-500/30 hover:bg-purple-500/60 text-white p-2 px-4 rounded-xl flex items-center gap-2"><i class="fas fa-link"></i> Copy</button>
+                                <button onclick="app.approveChore('${chore.id}', ${chore.points})" class="glass-button bg-blue-500/30 hover:bg-blue-500/60 text-white p-2 px-3 rounded-xl flex items-center gap-2"><i class="fas fa-check"></i> Approve</button>
+                            </div>
+                        `;
                     } else {
-                        const title = document.createElement('h4'); title.className = 'text-lg font-semibold'; title.textContent = chore.title;
-                        const pts = document.createElement('p'); pts.className = 'text-sm text-yellow-300 font-bold'; pts.textContent = `${chore.points} pts`;
-                        left.appendChild(title); left.appendChild(pts);
-
-                        const completeBtn = document.createElement('button'); completeBtn.className = 'glass-button bg-green-500/20 hover:bg-green-500/40 text-white p-2 px-4 rounded-xl font-bold'; completeBtn.textContent = 'Mark Done';
-                        completeBtn.addEventListener('click', () => this.completeChore(chore.id, chore.title, chore.points));
-
-                        el.appendChild(left); el.appendChild(completeBtn);
+                        el.innerHTML = `
+                            <div>
+                                <h4 class="text-lg font-semibold">${chore.title}</h4>
+                                <p class="text-sm text-yellow-300 font-bold">${chore.points} pts</p>
+                            </div>
+                            <button onclick="app.completeChore('${chore.id}', '${String(chore.title).replace(/'/g, "\\'")}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/40 text-white p-2 px-4 rounded-xl font-semibold">Mark Done</button>
+                        `;
                     }
-
                     container.appendChild(el);
                 });
             },
@@ -507,22 +553,17 @@
                 this.defaultPrizes.forEach(prize => {
                     const el = document.createElement('div');
                     el.className = 'glass-panel p-6 rounded-2xl flex flex-col items-center text-center transition-transform hover:-translate-y-2 group relative overflow-hidden';
-
-                    const deco = document.createElement('div'); deco.className = `absolute -right-4 -top-4 w-20 h-20 ${prize.color} rounded-full opacity-20 blur-xl group-hover:opacity-40 transition-opacity`;
-                    const icon = document.createElement('i'); icon.className = `fas ${prize.icon} text-4xl mb-4 text-white drop-shadow-lg`;
-                    const title = document.createElement('h4'); title.className = 'text-lg font-bold mb-2 leading-tight'; title.textContent = prize.title;
-                    const cost = document.createElement('p'); cost.className = 'text-yellow-300 font-bold mb-3'; cost.textContent = `${prize.cost} pts`;
-                    const btn = document.createElement('button');
                     const canAfford = this.points >= prize.cost;
-                    btn.className = canAfford ? 'w-full py-2 rounded-xl font-bold transition-all bg-yellow-400 hover:bg-yellow-500 text-yellow-900 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : 'w-full py-2 rounded-xl font-bold transition-all glass-button opacity-50 cursor-not-allowed';
-                    btn.disabled = !canAfford;
-                    btn.textContent = canAfford ? 'Redeem' : 'Not enough points';
-                    if (canAfford) btn.addEventListener('click', () => this.redeemPrize(prize.id));
-
-                    const inner = document.createElement('div'); inner.className = 'mt-auto w-full pt-4';
-                    inner.appendChild(cost); inner.appendChild(btn);
-
-                    el.appendChild(deco); el.appendChild(icon); el.appendChild(title); el.appendChild(inner);
+                    const btnClass = canAfford ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : 'glass-button opacity-50 cursor-not-allowed';
+                    el.innerHTML = `
+                        <div class="absolute -right-4 -top-4 w-20 h-20 ${prize.color} rounded-full opacity-20 blur-xl group-hover:opacity-40 transition-opacity"></div>
+                        <i class="fas ${prize.icon} text-4xl mb-4 text-white drop-shadow-lg"></i>
+                        <h4 class="text-lg font-bold mb-2 leading-tight">${prize.title}</h4>
+                        <div class="mt-auto w-full pt-4">
+                            <p class="text-yellow-300 font-bold mb-3">${prize.cost} pts</p>
+                            <button ${!canAfford ? 'disabled' : ''} onclick="app.redeemPrize('${prize.id}')" class="w-full py-2 rounded-xl font-bold transition-all ${btnClass}">${canAfford ? 'Redeem' : 'Not enough'}</button>
+                        </div>
+                    `;
                     container.appendChild(el);
                 });
             },
@@ -546,7 +587,10 @@
                 updateDoc(doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'profile', 'data'), { points: this.points - prize.cost }).then(() => {
                     addDoc(collection(this.db, 'artifacts', this.appId, 'users', this.userId, 'redeemed_prizes'), { title: prize.title, icon: prize.icon, cost: prize.cost, timestamp: Date.now() }).then(() => {
                         this.showToast(`Redeemed ${prize.title}! 🎉`, 'success');
-                    }).catch(() => this.showToast('Error recording redeemed prize.', 'error'));
+                        this.renderPrizes();
+                        this.renderRedeemedPrizes();
+                        this.updatePointsUI();
+                    }).catch(() => this.showToast('Error recording redemption.', 'error'));
                 }).catch(() => this.showToast('Error redeeming prize.', 'error'));
             },
 
@@ -559,17 +603,13 @@
                     const date = new Date(prize.timestamp).toLocaleDateString();
                     const el = document.createElement('div');
                     el.className = 'glass-panel p-4 rounded-xl flex items-center gap-4 opacity-80';
-
-                    const iconWrap = document.createElement('div'); iconWrap.className = 'w-12 h-12 rounded-full glass flex items-center justify-center';
-                    const icon = document.createElement('i'); icon.className = `fas ${prize.icon} text-xl text-yellow-300`;
-                    iconWrap.appendChild(icon);
-
-                    const info = document.createElement('div');
-                    const h = document.createElement('h4'); h.className = 'font-bold text-sm'; h.textContent = prize.title;
-                    const p = document.createElement('p'); p.className = 'text-xs text-gray-300'; p.textContent = `Redeemed: ${date}`;
-                    info.appendChild(h); info.appendChild(p);
-
-                    el.appendChild(iconWrap); el.appendChild(info);
+                    el.innerHTML = `
+                        <div class="w-12 h-12 rounded-full glass flex items-center justify-center"><i class="fas ${prize.icon} text-xl text-yellow-300"></i></div>
+                        <div>
+                            <h4 class="font-bold text-sm">${prize.title}</h4>
+                            <p class="text-xs text-gray-300">Redeemed: ${date}</p>
+                        </div>
+                    `;
                     container.appendChild(el);
                 });
             },
@@ -591,15 +631,17 @@
                         btn.disabled = false;
                         return;
                     }
-                    // IMPORTANT: Do NOT call third-party generative APIs directly from the client with an API key.
-                    // This should be proxied through a server/Cloud Function that holds the API key.
-                    const prompt = "Act as an expert in child psychology and gamification. Suggest 3 fun, slightly unconventional, and highly engaging household chores for kids to do. Return ONLY JSON array of objects with 'title' and 'points'.";
+                    const prompt = "Act as an expert in child psychology and gamification. Suggest 3 fun, slightly unconventional, and highly engaging household chores for kids to do. Return ONLY a JSON array of objects with title and numeric points.";
                     const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } };
-                    // Example: call your server endpoint that proxies to the generative model.
-                    fetch('/api/generate-chores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                    const apiKey = '';
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                    fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
                     .then(res => res.ok ? res.json() : Promise.reject(new Error('API Network error')))
                     .then(result => {
-                        const suggestions = result.suggestions || [];
+                        const textContent = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (!textContent) throw new Error('No content generated');
+                        const cleanJson = textContent.replace(/```json\n|\n```/g, '');
+                        const suggestions = JSON.parse(cleanJson);
                         return Promise.all(suggestions.map(chore => this.addChore(chore.title, chore.points)));
                     }).then(() => {
                         this.showToast('Added 3 AI-suggested chores!', 'success');
