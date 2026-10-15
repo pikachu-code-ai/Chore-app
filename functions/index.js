@@ -4,6 +4,7 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
+const sgMail = require('@sendgrid/mail');
 
 admin.initializeApp();
 
@@ -11,8 +12,7 @@ const app = express();
 app.use(express.json());
 
 const DEFAULT_APP_ID = 'kaching-default-app';
-const APPROVAL_TOKEN_TTL_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_APPROVALS_PER_HOUR_PER_UID = 20;
+const APPROVAL_TOKEN_TTL_MS = 10 * 60 * 1000;
 const perUidHits = new Map();
 
 function getApprovalSecret() {
@@ -50,15 +50,29 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 async function getGenerativeApiKey() {
   const secretResource = process.env.GENERATIVE_SECRET_NAME || functions.config().generative?.secret_name;
   if (!secretResource) throw new Error('GENERATIVE_SECRET_NAME not set');
-
   if (cachedApiKey && Date.now() - cachedAt < CACHE_TTL_MS) return cachedApiKey;
-
   const [accessResponse] = await secretClient.accessSecretVersion({ name: secretResource });
   const payload = accessResponse.payload && accessResponse.payload.data ? accessResponse.payload.data.toString('utf8') : null;
   if (!payload) throw new Error('Secret payload empty');
   cachedApiKey = payload.trim();
   cachedAt = Date.now();
   return cachedApiKey;
+}
+
+let cachedSendGridKey = null;
+let cachedSendGridAt = 0;
+const SENDGRID_CACHE_TTL_MS = 5 * 60 * 1000;
+
+async function getSendgridApiKey() {
+  const secretResource = process.env.SENDGRID_SECRET_NAME || functions.config().sendgrid?.secret_name;
+  if (!secretResource) throw new Error('SENDGRID_SECRET_NAME not set');
+  if (cachedSendGridKey && Date.now() - cachedSendGridAt < SENDGRID_CACHE_TTL_MS) return cachedSendGridKey;
+  const [accessResponse] = await secretClient.accessSecretVersion({ name: secretResource });
+  const payload = accessResponse.payload && accessResponse.payload.data ? accessResponse.payload.data.toString('utf8') : null;
+  if (!payload) throw new Error('SendGrid secret payload empty');
+  cachedSendGridKey = payload.trim();
+  cachedSendGridAt = Date.now();
+  return cachedSendGridKey;
 }
 
 async function verifyIdToken(req) {
@@ -115,6 +129,40 @@ async function callGenerativeAPI(apiKey, payload) {
     throw new Error(`Generative API error ${res.status}: ${text}`);
   }
   return res.json();
+}
+
+async function sendApprovalEmail(token, parentEmail, childInfo = {}, appHost = process.env.APP_HOST || functions.config().app?.host || '') {
+  if (!parentEmail) throw new Error('Missing parent email');
+  const sendgridKey = await getSendgridApiKey();
+  sgMail.setApiKey(sendgridKey);
+
+  const approvalPath = '/approve.html';
+  const encoded = encodeURIComponent(token);
+  const approvalUrl = appHost ? `${appHost}${approvalPath}?token=${encoded}` : `${approvalPath}?token=${encoded}`;
+
+  const subject = `${childInfo.childDisplayName || 'A child'} requested approval for a chore`;
+  const text = `Hi,\n\n${childInfo.childDisplayName || 'A child'} requested approval for the chore "${childInfo.choreTitle || 'a chore'}" worth ${childInfo.points || ''} points.\n\nClick this secure link to approve: ${approvalUrl}\n\nThis link expires in a few minutes. If you did not expect this email, ignore it.\n\nThanks,\nKaching Team\n`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111;">
+      <p>Hi,</p>
+      <p><strong>${childInfo.childDisplayName || 'A child'}</strong> requested approval for the chore <em>"${childInfo.choreTitle || 'a chore'}"</em> worth <strong>${childInfo.points || ''} points</strong>.</p>
+      <p><a href="${approvalUrl}" style="display:inline-block;padding:12px 18px;background:#1f8ef1;color:#fff;border-radius:6px;text-decoration:none;">Approve Chore</a></p>
+      <p style="color:#666;font-size:13px;">This link expires in a few minutes. If you did not expect this email, ignore it.</p>
+      <hr>
+      <p style="font-size:12px;color:#999">Kaching</p>
+    </div>
+  `;
+
+  const msg = {
+    to: parentEmail,
+    from: process.env.EMAIL_FROM || functions.config().sendgrid?.from || 'noreply@yourdomain.com',
+    subject,
+    text,
+    html,
+  };
+
+  return sgMail.send(msg);
 }
 
 app.post('/generate-chores', async (req, res) => {
@@ -179,7 +227,7 @@ app.post('/generate-chores', async (req, res) => {
 app.post('/create-approval-token', async (req, res) => {
   try {
     const uid = await verifyIdToken(req);
-    const { choreId, points, appId } = req.body || {};
+    const { choreId, points, appId, parentEmail, choreTitle, childDisplayName } = req.body || {};
 
     if (!choreId || !points || Number(points) <= 0) {
       return res.status(400).json({ error: 'Missing choreId or points' });
@@ -194,7 +242,20 @@ app.post('/create-approval-token', async (req, res) => {
     const payload = { uid: targetUid, choreId, points: Number(points), appId: appId || DEFAULT_APP_ID, expiresAt };
     const token = signApprovalToken(payload);
 
-    return res.json({ token, expiresAt, appId: payload.appId });
+    const emailValue = (typeof parentEmail === 'string') ? parentEmail.trim() : '';
+    if (emailValue && emailValue.includes('@')) {
+      try {
+        await sendApprovalEmail(token, emailValue, {
+          childDisplayName: childDisplayName || 'Your child',
+          choreTitle: choreTitle || 'your chore',
+          points: Number(points)
+        }, process.env.APP_HOST || functions.config().app?.host || '');
+      } catch (emailErr) {
+        console.error('Failed to send approval email:', emailErr);
+      }
+    }
+
+    return res.json({ token, expiresAt, appId: payload.appId, emailSent: !!(emailValue && emailValue.includes('@')) });
   } catch (err) {
     console.error('create-approval-token error:', err);
     if (err instanceof functions.https.HttpsError) return res.status(401).json({ error: err.message });
@@ -204,7 +265,7 @@ app.post('/create-approval-token', async (req, res) => {
 
 app.post('/approve-chore', async (req, res) => {
   try {
-    const token = req.body && req.body.token; 
+    const token = req.body && req.body.token;
     const payload = verifyApprovalToken(token);
 
     const appId = payload.appId || req.body.appId || DEFAULT_APP_ID;
@@ -232,3 +293,4 @@ app.post('/approve-chore', async (req, res) => {
 });
 
 exports.api = functions.https.onRequest(app);
+

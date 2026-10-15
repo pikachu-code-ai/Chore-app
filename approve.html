@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Approve Chore</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      min-height: 100vh;
+      color: white;
+    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center p-6">
+  <div class="w-full max-w-lg rounded-3xl border border-white/20 bg-white/10 p-8 shadow-2xl backdrop-blur-xl">
+    <h1 class="text-3xl font-bold mb-4">Approve Chore</h1>
+    <p id="status" class="mb-6 text-gray-100">Processing approval...</p>
+    <button id="approve-btn" class="hidden w-full rounded-xl bg-green-500/40 px-5 py-3 font-bold text-white hover:bg-green-500/60">
+      Approve Now
+    </button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const statusEl = document.getElementById('status');
+    const approveBtn = document.getElementById('approve-btn');
+
+    async function approve() {
+      if (!token) {
+        statusEl.textContent = 'Missing approval token. Please use a valid link from your parent email.';
+        return;
+      }
+
+      try {
+        statusEl.textContent = 'Approving chore...';
+        const response = await fetch('/api/approve-chore', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Approval failed');
+        statusEl.textContent = `Approval successful! ${data.points} points were added.`;
+        approveBtn.classList.add('hidden');
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = error.message || 'This link is invalid or expired.';
+      }
+    }
+
+    approveBtn.addEventListener('click', approve);
+
+    if (token) {
+      approve();
+    } else {
+      statusEl.textContent = 'Missing approval token. Please use a valid link from your parent email.';
+      approveBtn.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
