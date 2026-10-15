@@ -131,6 +131,14 @@ async function callGenerativeAPI(apiKey, payload) {
   return res.json();
 }
 
+function getClientIp(req) {
+  const xff = req.headers['x-forwarded-for'];
+  if (xff) return xff.split(',')[0].trim();
+  if (req.ip) return req.ip;
+  if (req.connection && req.connection.remoteAddress) return req.connection.remoteAddress;
+  return null;
+}
+
 async function sendApprovalEmail(token, parentEmail, childInfo = {}, appHost = process.env.APP_HOST || functions.config().app?.host || '') {
   if (!parentEmail) throw new Error('Missing parent email');
   const sendgridKey = await getSendgridApiKey();
@@ -163,6 +171,22 @@ async function sendApprovalEmail(token, parentEmail, childInfo = {}, appHost = p
   };
 
   return sgMail.send(msg);
+}
+
+// Audit logging helper
+function dbForApp(appId) {
+  return admin.firestore();
+}
+
+async function logAudit(appId, entry) {
+  try {
+    const db = dbForApp(appId || DEFAULT_APP_ID);
+    const auditsRef = db.collection('artifacts').doc(appId || DEFAULT_APP_ID).collection('audits');
+    const doc = Object.assign({ timestamp: Date.now() }, entry);
+    await auditsRef.add(doc);
+  } catch (err) {
+    console.error('Failed to write audit log:', err);
+  }
 }
 
 app.post('/generate-chores', async (req, res) => {
@@ -206,6 +230,11 @@ app.post('/generate-chores', async (req, res) => {
       return { title, points };
     }).slice(0, 5);
 
+    // Audit: record that user requested generation (don't store raw model output)
+    try {
+      await logAudit(DEFAULT_APP_ID, { type: 'generate_chores', uid, theme: theme || null, suggestions_count: normalized.length });
+    } catch (e) { console.error('Audit log error:', e); }
+
     if (!normalized.length) {
       return res.json({
         suggestions: [
@@ -243,6 +272,7 @@ app.post('/create-approval-token', async (req, res) => {
     const token = signApprovalToken(payload);
 
     const emailValue = (typeof parentEmail === 'string') ? parentEmail.trim() : '';
+    let emailSent = false;
     if (emailValue && emailValue.includes('@')) {
       try {
         await sendApprovalEmail(token, emailValue, {
@@ -250,12 +280,28 @@ app.post('/create-approval-token', async (req, res) => {
           choreTitle: choreTitle || 'your chore',
           points: Number(points)
         }, process.env.APP_HOST || functions.config().app?.host || '');
+        emailSent = true;
       } catch (emailErr) {
         console.error('Failed to send approval email:', emailErr);
       }
     }
 
-    return res.json({ token, expiresAt, appId: payload.appId, emailSent: !!(emailValue && emailValue.includes('@')) });
+    // Audit log: token created
+    try {
+      await logAudit(payload.appId, {
+        type: 'create_approval_token',
+        uid: payload.uid,
+        choreId: payload.choreId,
+        points: payload.points,
+        parentEmailProvided: !!emailValue,
+        token_preview: token.slice(0, 8) + '...',
+        expiresAt,
+        ip: getClientIp(req),
+        userAgent: req.headers['user-agent'] || null
+      });
+    } catch (e) { console.error('Audit write failed:', e); }
+
+    return res.json({ token, expiresAt, appId: payload.appId, emailSent });
   } catch (err) {
     console.error('create-approval-token error:', err);
     if (err instanceof functions.https.HttpsError) return res.status(401).json({ error: err.message });
@@ -284,6 +330,19 @@ app.post('/approve-chore', async (req, res) => {
       transaction.set(profileRef, { points: currentPoints + Number(payload.points) }, { merge: true });
     });
 
+    // Audit: record approval action
+    try {
+      await logAudit(appId, {
+        type: 'approve_chore',
+        uid: payload.uid,
+        choreId: payload.choreId,
+        points: Number(payload.points),
+        token_preview: token ? (token.slice(0,8) + '...') : null,
+        ip: req ? getClientIp(req) : null,
+        userAgent: req.headers['user-agent'] || null
+      });
+    } catch(e) { console.error('Audit write failed:', e); }
+
     return res.json({ ok: true, points: Number(payload.points), uid: payload.uid, choreId: payload.choreId });
   } catch (err) {
     console.error('approve-chore error:', err);
@@ -293,4 +352,3 @@ app.post('/approve-chore', async (req, res) => {
 });
 
 exports.api = functions.https.onRequest(app);
-
