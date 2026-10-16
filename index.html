@@ -14,6 +14,7 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            /* Vibrant animated gradient background */
             background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
@@ -27,45 +28,124 @@
             100% { background-position: 0% 50%; }
         }
 
-        .glass { background: rgba(255,255,255,0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 8px 32px 0 rgba(0,0,0,0.2); }
-        .glass-panel { background: rgba(0,0,0,0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); }
-        .glass-button { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); transition: all 0.3s ease; }
-        .glass-button:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
-        .glass-button:active { transform: translateY(0); }
-        .glass-input { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; }
-        .glass-input::placeholder { color: rgba(255,255,255,0.7); }
-        .glass-input:focus { outline: none; background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.6); }
+        /* Glassmorphism utility classes */
+        .glass {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
 
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+        .glass-panel {
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-        .logo-bounce { animation: bounce 2s infinite ease-in-out; }
-        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        .glass-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
 
-        .loader { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid white; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .glass-nav { background: rgba(255,255,255,0.1); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .glass-button:active {
+            transform: translateY(0);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .glass-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .glass-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Scrollbar styling for glass look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Logo Animation */
+        .logo-bounce {
+            animation: bounce 2s infinite ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Loader */
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Navbar */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen w-full antialiased text-white">
 
+    <!-- Top Navigation -->
     <header class="glass-nav fixed top-0 w-full z-40 px-6 py-4 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-            <div class="w-10 h-10 rounded-xl shadow-lg bg-white flex items-center justify-center text-yellow-500 text-xl"><i class="fas fa-piggy-bank"></i></div>
+            <div class="w-10 h-10 rounded-xl shadow-lg bg-white flex items-center justify-center text-yellow-500 text-xl">
+                <i class="fas fa-piggy-bank"></i>
+            </div>
             <h1 class="text-2xl font-bold tracking-wider" style="text-shadow: 0 2px 10px rgba(0,0,0,0.3);">Kaching</h1>
         </div>
+        
         <nav class="hidden md:flex gap-6">
             <button onclick="app.scrollToSection('view-home')" class="hover:text-yellow-300 font-semibold transition-colors">Home</button>
             <button onclick="app.scrollToSection('view-chores')" class="hover:text-yellow-300 font-semibold transition-colors">Chores</button>
             <button onclick="app.scrollToSection('view-prizes')" class="hover:text-yellow-300 font-semibold transition-colors">Prizes</button>
             <button onclick="app.scrollToSection('view-etc')" class="hover:text-yellow-300 font-semibold transition-colors">Settings</button>
         </nav>
+
         <div class="flex items-center gap-4">
             <div class="hidden md:block text-right">
-                <p class="text-xs text-gray-300">Logged in as</p>
-                <p class="font-semibold text-xs truncate w-24" id="user-id-display">Loading...</p>
+                <p class="text-xs text-gray-300">Status</p>
+                <p class="font-semibold text-xs text-green-300">Ready</p>
             </div>
             <div class="md:hidden flex gap-4 text-xl">
                 <button onclick="app.scrollToSection('view-chores')"><i class="fas fa-clipboard-list"></i></button>
@@ -74,124 +154,173 @@
         </div>
     </header>
 
+    <!-- Main Content Area -->
     <main class="flex-1 w-full max-w-6xl mx-auto px-4 md:px-8 pt-28 pb-12 relative flex flex-col gap-12 md:gap-24">
+        
+        <!-- Loading Overlay -->
         <div id="loading-overlay" class="fixed inset-0 glass z-50 flex flex-col items-center justify-center m-4 rounded-3xl md:m-8">
             <div class="loader mb-4 border-t-yellow-400 w-12 h-12 border-4"></div>
             <p class="text-xl font-semibold animate-pulse">Loading Kaching...</p>
         </div>
 
+        <!-- Parent Email Onboarding Modal -->
+        <div id="email-onboarding-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden">
+            <div class="glass-panel p-8 rounded-3xl max-w-md w-full mx-4 border-t border-white/20 shadow-2xl text-center">
+                <div class="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center text-yellow-600 text-3xl mx-auto mb-4 shadow-lg">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">Welcome to Kaching!</h2>
+                <p class="text-gray-200 mb-6">Before we start earning points, let's set up your parent's email so they can approve your chores.</p>
+                
+                <!-- Added a form wrapper that prevents the default page reload -->
+                <form onsubmit="app.submitInitialParentEmail(event); return false;" class="w-full">
+                    <input type="email" id="onboarding-email-input" placeholder="parent@example.com" class="w-full px-4 py-3 rounded-xl glass-input mb-4 text-center">
+                    <button type="submit" class="w-full glass-button bg-yellow-400/20 hover:bg-yellow-400/40 text-yellow-100 rounded-xl py-3 font-bold transition-all border border-yellow-400/50 shadow-lg">Let's Go!</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- HOME SECTION -->
         <section id="view-home" class="min-h-[70vh] flex flex-col justify-center glass rounded-3xl p-6 md:p-10 shadow-2xl scroll-mt-28">
             <header class="mb-10 flex justify-between items-center flex-wrap gap-4">
-                <div>
-                    <h2 class="text-4xl font-bold mb-2">Welcome Back! 👋</h2>
-                    <p class="text-lg text-gray-200">Ready to earn some rewards today?</p>
-                </div>
-                <div class="glass-panel px-6 py-4 rounded-2xl flex items-center gap-4 shadow-lg border-yellow-400/30 border-2">
-                    <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center text-yellow-600 text-2xl shadow-inner"><i class="fas fa-coins"></i></div>
                     <div>
-                        <p class="text-sm font-semibold text-yellow-200 uppercase tracking-wider">Total Points</p>
-                        <p class="text-4xl font-bold text-white" id="home-points-display">0</p>
+                        <h2 class="text-4xl font-bold mb-2">Welcome Back! 👋</h2>
+                        <p class="text-lg text-gray-200">Ready to earn some rewards today?</p>
                     </div>
-                </div>
-            </header>
-            <div class="flex-1 flex flex-col items-center justify-center opacity-80 mt-8">
-                <div class="relative w-64 h-64 logo-bounce mb-8">
-                    <div class="absolute inset-0 bg-yellow-400 rounded-full blur-3xl opacity-30"></div>
-                    <div class="w-full h-full rounded-3xl relative z-10 bg-white/10 backdrop-blur-sm p-4 flex items-center justify-center border border-white/20 shadow-2xl">
-                        <i class="fas fa-piggy-bank text-9xl text-yellow-400 drop-shadow-2xl"></i>
+                    <div class="glass-panel px-6 py-4 rounded-2xl flex items-center gap-4 shadow-lg border-yellow-400/30 border-2">
+                        <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center text-yellow-600 text-2xl shadow-inner">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-yellow-200 uppercase tracking-wider">Total Points</p>
+                            <p class="text-4xl font-bold text-white" id="home-points-display">0</p>
+                        </div>
                     </div>
+                </header>
+
+                <div class="flex-1 flex flex-col items-center justify-center opacity-80 mt-8">
+                    <!-- Conceptual Logo Display -->
+                    <div class="relative w-64 h-64 logo-bounce mb-8">
+                        <div class="absolute inset-0 bg-yellow-400 rounded-full blur-3xl opacity-30"></div>
+                        <div class="w-full h-full rounded-3xl relative z-10 bg-white/10 backdrop-blur-sm p-4 flex items-center justify-center border border-white/20 shadow-2xl">
+                            <i class="fas fa-piggy-bank text-9xl text-yellow-400 drop-shadow-2xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">Do Chores. Earn Rewards.</h3>
+                    <p class="text-center max-w-md text-gray-200">Scroll down to see what needs to be done, or check out the prizes you can claim!</p>
                 </div>
-                <h3 class="text-2xl font-bold mb-2">Do Chores. Earn Rewards.</h3>
-                <p class="text-center max-w-md text-gray-200">Scroll down to see what needs to be done, or check out the prizes you can claim!</p>
-            </div>
         </section>
 
+        <!-- CHORES SECTION -->
         <section id="view-chores" class="flex flex-col glass rounded-3xl p-6 md:p-10 shadow-2xl scroll-mt-28">
             <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
                 <h2 class="text-4xl font-bold"><i class="fas fa-clipboard-list mr-3"></i>Your Chores</h2>
-                <div class="glass-panel px-4 py-2 rounded-xl"><span class="text-yellow-300 font-bold" id="chores-points-display">0 pts</span> available</div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1 overflow-hidden">
-                <div class="lg:col-span-2 flex flex-col h-full">
-                    <div class="glass-panel rounded-2xl p-6 flex-1 overflow-y-auto" id="chore-list-container">
-                        <div class="text-center text-gray-300 py-10" id="no-chores-msg">No chores yet! Add some or ask AI for suggestions.</div>
+                    <div class="glass-panel px-4 py-2 rounded-xl">
+                        <span class="text-yellow-300 font-bold" id="chores-points-display">0 pts</span> available
                     </div>
                 </div>
-                <div class="flex flex-col gap-6">
-                    <div class="glass-panel rounded-2xl p-6">
-                        <h3 class="text-xl font-bold mb-4">Add a Chore</h3>
-                        <input type="text" id="new-chore-title" placeholder="Chore Name (e.g. Clean Room)" class="w-full px-4 py-3 rounded-xl glass-input mb-4">
-                        <div class="flex gap-4 mb-4">
-                            <input type="number" id="new-chore-points" placeholder="Points" class="w-1/2 px-4 py-3 rounded-xl glass-input">
-                            <button onclick="app.addChore()" class="w-1/2 glass-button bg-green-500/30 hover:bg-green-500/50 rounded-xl font-bold">Add</button>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1 overflow-hidden">
+                    <!-- Chore List -->
+                    <div class="lg:col-span-2 flex flex-col h-full">
+                        <div class="glass-panel rounded-2xl p-6 flex-1 overflow-y-auto" id="chore-list-container">
+                            <!-- Chores injected here -->
+                            <div class="text-center text-gray-300 py-10" id="no-chores-msg">
+                                No chores yet! Add some or ask AI for suggestions.
+                            </div>
                         </div>
                     </div>
-                    <div class="glass-panel rounded-2xl p-6 bg-gradient-to-br from-indigo-600/30 to-purple-600/30 border-purple-400/40">
-                        <h3 class="text-xl font-bold mb-2 flex items-center gap-2"><i class="fas fa-magic text-yellow-300"></i> AI Suggestions</h3>
-                        <p class="text-sm text-gray-200 mb-4">Need ideas? Let Gemini suggest fun chores!</p>
-                        <button onclick="app.suggestChores()" id="btn-suggest-chores" class="w-full glass-button bg-white/20 hover:bg-white/30 rounded-xl py-3 font-bold flex justify-center items-center gap-2"><span>Suggest Fun Chores</span></button>
+
+                    <!-- Add Chore / AI Actions -->
+                    <div class="flex flex-col gap-6">
+                        <div class="glass-panel rounded-2xl p-6">
+                            <h3 class="text-xl font-bold mb-4">Add a Chore</h3>
+                            <input type="text" id="new-chore-title" placeholder="Chore Name (e.g. Clean Room)" class="w-full px-4 py-3 rounded-xl glass-input mb-4">
+                            <div class="flex gap-4 mb-4">
+                                <input type="number" id="new-chore-points" placeholder="Points" class="w-1/2 px-4 py-3 rounded-xl glass-input">
+                                <button type="button" onclick="app.addChore()" class="w-1/2 glass-button bg-green-500/30 hover:bg-green-500/50 rounded-xl font-bold">Add</button>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-2xl p-6 bg-gradient-to-br from-indigo-600/30 to-purple-600/30 border-purple-400/40">
+                            <h3 class="text-xl font-bold mb-2 flex items-center gap-2">
+                                <i class="fas fa-magic text-yellow-300"></i> AI Suggestions
+                            </h3>
+                            <p class="text-sm text-gray-200 mb-4">Need ideas? Let Gemini suggest fun chores!</p>
+                            <button type="button" onclick="app.suggestChores()" id="btn-suggest-chores" class="w-full glass-button bg-white/20 hover:bg-white/30 rounded-xl py-3 font-bold flex justify-center items-center gap-2">
+                                <span>Suggest Fun Chores</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
         </section>
 
+        <!-- PRIZES SECTION -->
         <section id="view-prizes" class="flex flex-col glass rounded-3xl p-6 md:p-10 shadow-2xl scroll-mt-28">
-            <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
+             <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
                 <h2 class="text-4xl font-bold"><i class="fas fa-trophy text-yellow-400 mr-3"></i>Prize Room</h2>
-                <div class="glass-panel px-6 py-3 rounded-2xl border-yellow-400/50 border shadow-[0_0_15px_rgba(250,204,21,0.3)]">
-                    <span class="text-sm uppercase tracking-wider text-gray-200 block text-center">Your Balance</span>
-                    <span class="text-3xl font-bold text-yellow-300" id="prizes-points-display">0</span> <span class="text-yellow-100">pts</span>
+                    <div class="glass-panel px-6 py-3 rounded-2xl border-yellow-400/50 border shadow-[0_0_15px_rgba(250,204,21,0.3)]">
+                        <span class="text-sm uppercase tracking-wider text-gray-200 block text-center">Your Balance</span>
+                        <span class="text-3xl font-bold text-yellow-300" id="prizes-points-display">0</span> <span class="text-yellow-100">pts</span>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto pr-2 pb-10">
+                    <h3 class="text-2xl font-semibold mb-4 border-b border-white/20 pb-2">Available Prizes</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12" id="available-prizes-container">
+                        <!-- Prizes injected here -->
+                    </div>
+
+                    <h3 class="text-2xl font-semibold mb-4 border-b border-white/20 pb-2 mt-8">Your Redeemed Prizes</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="redeemed-prizes-container">
+                    <!-- Redeemed prizes injected here -->
                 </div>
             </div>
-            <div class="flex-1 overflow-y-auto pr-2 pb-10">
-                <h3 class="text-2xl font-semibold mb-4 border-b border-white/20 pb-2">Available Prizes</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12" id="available-prizes-container"></div>
-                <h3 class="text-2xl font-semibold mb-4 border-b border-white/20 pb-2 mt-8">Your Redeemed Prizes</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="redeemed-prizes-container"></div>
-            </div>
         </section>
 
+        <!-- ETC SECTION -->
         <section id="view-etc" class="flex flex-col items-center justify-center glass rounded-3xl p-6 md:p-10 shadow-2xl scroll-mt-28">
             <div class="w-full max-w-md">
                 <h2 class="text-3xl font-bold mb-6 text-center"><i class="fas fa-cog mr-3"></i>Settings & More</h2>
-                <div class="glass-panel p-6 rounded-2xl mb-6">
-                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-shield-alt text-blue-400"></i> Parental Controls</h3>
-                    <p class="text-sm text-gray-200 mb-4">Set a parent's email address to receive chore approval requests when chores are finished.</p>
-                    <div class="flex flex-col gap-3">
-                        <input type="email" id="parent-email-input" placeholder="parent@email.com" class="w-full px-4 py-3 rounded-xl glass-input">
-                        <button onclick="app.saveParentEmail()" class="w-full glass-button bg-blue-500/30 hover:bg-blue-500/50 rounded-xl py-3 font-bold">Save Email</button>
+                    
+                    <div class="glass-panel p-6 rounded-2xl mb-6">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-shield-alt text-blue-400"></i> Parental Controls
+                        </h3>
+                        <p class="text-sm text-gray-200 mb-4">Set a parent's email address to receive chore approval requests when chores are finished.</p>
+                        
+                        <!-- Added a form wrapper here too to prevent reloading -->
+                        <form onsubmit="app.saveParentEmail(event); return false;" class="flex flex-col gap-3">
+                            <input type="email" id="parent-email-input" placeholder="parent@email.com" class="w-full px-4 py-3 rounded-xl glass-input">
+                            <button type="submit" class="w-full glass-button bg-blue-500/30 hover:bg-blue-500/50 rounded-xl py-3 font-bold">
+                                Save Email
+                            </button>
+                        </form>
+                    </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl text-center">
+                        <h3 class="text-xl font-bold mb-2">App Info</h3>
+                        <p class="text-sm text-gray-300 mb-1">Version: 1.1 (Parental Updates)</p>
+                        <p class="text-sm text-gray-300">Powered by Firebase & Gemini API</p>
                     </div>
                 </div>
-                <div class="glass-panel p-6 rounded-2xl text-center">
-                    <h3 class="text-xl font-bold mb-2">App Info</h3>
-                    <p class="text-sm text-gray-300 mb-1">Version: 1.1 (Parental Updates)</p>
-                    <p class="text-sm text-gray-300">Powered by Firebase & Gemini API</p>
-                </div>
-            </div>
         </section>
 
+        <!-- Toast Notification Container -->
         <div id="toast-container" class="fixed bottom-8 right-8 z-50 flex flex-col gap-3"></div>
+
     </main>
 
     <script>
-      window.__firebase_config = '{"apiKey":"YOUR_API_KEY","authDomain":"YOUR_PROJECT_ID.firebaseapp.com","projectId":"YOUR_PROJECT_ID","storageBucket":"YOUR_PROJECT_ID.appspot.com","messagingSenderId":"YOUR_SENDER_ID","appId":"YOUR_APP_ID"}';
-    </script>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+        // Global App State & Logic (Using LocalStorage - No Login Required!)
         window.app = {
-            db: null,
-            auth: null,
-            userId: null,
-            demo: false,
-            appId: typeof __app_id !== 'undefined' ? __app_id : 'kaching-default-app',
             points: 0,
             parentEmail: null,
             chores: [],
             redeemedPrizes: [],
+            
+            // Default Prizes
             defaultPrizes: [
                 { id: 'p1', title: 'Extra Screen Time (30m)', cost: 50, icon: 'fa-gamepad', color: 'bg-blue-500' },
                 { id: 'p2', title: 'Pick Movie Night', cost: 100, icon: 'fa-film', color: 'bg-purple-500' },
@@ -203,249 +332,232 @@
 
             async init() {
                 try {
-                    const firebaseConfig = JSON.parse(__firebase_config || '{}');
-                    if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'YOUR_API_KEY') {
-                        throw new Error('No real Firebase config available.');
-                    }
-                    const firebaseApp = initializeApp(firebaseConfig);
-                    this.db = getFirestore(firebaseApp);
-                    this.auth = getAuth(firebaseApp);
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(this.auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(this.auth);
-                    }
-                    this.userId = this.auth.currentUser?.uid;
-                    if (!this.userId) throw new Error('Authentication failed.');
-                    document.getElementById('user-id-display').textContent = this.userId;
-
-                    const profileRef = doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'profile', 'data');
-                    const profileSnap = await getDoc(profileRef);
-                    if (!profileSnap.exists()) await setDoc(profileRef, { points: 0 });
+                    // Load saved data from browser
+                    this.loadData();
 
                     const urlParams = new URLSearchParams(window.location.search);
                     const approveChoreId = urlParams.get('approve_chore');
                     const approvePts = parseInt(urlParams.get('pts'));
-                    const targetUid = urlParams.get('uid');
 
-                    if (approveChoreId && targetUid && !isNaN(approvePts)) {
-                        await this.handleParentApproval(approveChoreId, approvePts, targetUid);
+                    if (approveChoreId && !isNaN(approvePts)) {
+                        await this.handleParentApproval(approveChoreId, approvePts);
                         window.history.replaceState({}, document.title, window.location.pathname);
                     }
-                    this.setupListeners();
-                    this.renderPrizes();
-                    setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 800);
+
+                    // Hide Loading
+                    setTimeout(() => {
+                        document.getElementById('loading-overlay').style.display = 'none';
+                        if (!this.parentEmail) {
+                            document.getElementById('email-onboarding-modal').classList.remove('hidden');
+                        }
+                    }, 800);
+
                 } catch (error) {
-                    console.error('Init Error:', error);
-                    this.initDemoMode();
+                    console.error("Init Error:", error);
+                    this.showToast("Failed to load data.", "error");
+                    document.getElementById('loading-overlay').style.display = 'none';
                 }
             },
 
-            initDemoMode() {
-                this.demo = true;
-                this.userId = 'demo-user';
-                document.getElementById('user-id-display').textContent = this.userId;
-                const profileKey = `kaching_${this.appId}_profile_${this.userId}`;
-                const choresKey = `kaching_${this.appId}_chores_${this.userId}`;
-                const redeemedKey = `kaching_${this.appId}_redeemed_${this.userId}`;
-
-                const profile = JSON.parse(localStorage.getItem(profileKey) || '{}');
-                this.points = profile.points || 0;
-                this.parentEmail = profile.parentEmail || null;
-                this.chores = JSON.parse(localStorage.getItem(choresKey) || '[]');
-                this.redeemedPrizes = JSON.parse(localStorage.getItem(redeemedKey) || '[]');
-
+            loadData() {
+                try {
+                    const saved = localStorage.getItem('kaching_data');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        this.points = data.points || 0;
+                        this.parentEmail = data.parentEmail || null;
+                        this.chores = data.chores || [];
+                        this.redeemedPrizes = data.redeemedPrizes || [];
+                    }
+                } catch (e) {
+                    console.warn("Local storage access blocked by browser, running in memory-only mode.");
+                }
+                
                 const emailInput = document.getElementById('parent-email-input');
-                if (emailInput && this.parentEmail) emailInput.value = this.parentEmail;
+                if (emailInput && this.parentEmail) {
+                    emailInput.value = this.parentEmail;
+                }
 
-                this.updatePointsUI();
-                this.renderPrizes();
-                this.renderChores();
-                this.renderRedeemedPrizes();
-                document.getElementById('loading-overlay').style.display = 'none';
-                this.showToast('Running in demo mode (stored locally).', 'info');
+                this.updateUI();
             },
 
-            _profileKey() { return `kaching_${this.appId}_profile_${this.userId}`; },
-            _choresKey() { return `kaching_${this.appId}_chores_${this.userId}`; },
-            _redeemedKey() { return `kaching_${this.appId}_redeemed_${this.userId}`; },
-            _saveProfile() { if (!this.demo) return; localStorage.setItem(this._profileKey(), JSON.stringify({ points: this.points, parentEmail: this.parentEmail })); },
-            _saveChores() { if (!this.demo) return; localStorage.setItem(this._choresKey(), JSON.stringify(this.chores)); },
-            _saveRedeemed() { if (!this.demo) return; localStorage.setItem(this._redeemedKey(), JSON.stringify(this.redeemedPrizes)); },
+            saveData() {
+                try {
+                    localStorage.setItem('kaching_data', JSON.stringify({
+                        points: this.points,
+                        parentEmail: this.parentEmail,
+                        chores: this.chores,
+                        redeemedPrizes: this.redeemedPrizes
+                    }));
+                } catch (e) {
+                    console.warn("Local storage access blocked by browser, could not save data permanently.");
+                }
+                this.updateUI();
+            },
 
-            setupListeners() {
-                if (this.demo) return;
-                if (!this.userId) return;
+            submitInitialParentEmail(event) {
+                if (event) event.preventDefault(); // Prevents the page from reloading when you press Enter!
+                
+                const emailInput = document.getElementById('onboarding-email-input').value.trim();
+                if (!emailInput || !emailInput.includes('@')) {
+                    this.showToast("Please enter a valid email address.", "error");
+                    return;
+                }
+                
+                this.parentEmail = emailInput;
+                this.saveData();
+                document.getElementById('email-onboarding-modal').classList.add('hidden');
+                
+                // Keep the Settings input updated just in case
+                const settingsEmailInput = document.getElementById('parent-email-input');
+                if (settingsEmailInput) settingsEmailInput.value = this.parentEmail;
+                
+                this.showToast("Awesome! You're all set.", "success");
+            },
 
-                const profileRef = doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'profile', 'data');
-                onSnapshot(profileRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        this.points = docSnap.data().points || 0;
-                        this.parentEmail = docSnap.data().parentEmail || null;
-                        this.updatePointsUI();
-                        const emailInput = document.getElementById('parent-email-input');
-                        if (emailInput && this.parentEmail) emailInput.value = this.parentEmail;
-                        this.renderPrizes();
-                    }
-                }, (error) => console.error('Profile listen error:', error));
-
-                const choresRef = collection(this.db, 'artifacts', this.appId, 'users', this.userId, 'chores');
-                onSnapshot(choresRef, (snapshot) => {
-                    this.chores = [];
-                    snapshot.forEach(doc => { this.chores.push({ id: doc.id, ...doc.data() }); });
-                    this.chores.sort((a, b) => b.timestamp - a.timestamp);
-                    this.renderChores();
-                }, (error) => console.error('Chores listen error:', error));
-
-                const prizesRef = collection(this.db, 'artifacts', this.appId, 'users', this.userId, 'redeemed_prizes');
-                onSnapshot(prizesRef, (snapshot) => {
-                    this.redeemedPrizes = [];
-                    snapshot.forEach(doc => { this.redeemedPrizes.push({ id: doc.id, ...doc.data() }); });
-                    this.redeemedPrizes.sort((a, b) => b.timestamp - a.timestamp);
-                    this.renderRedeemedPrizes();
-                }, (error) => console.error('Prizes listen error:', error));
+            updateUI() {
+                this.updatePointsUI();
+                this.renderChores();
+                this.renderPrizes();
+                this.renderRedeemedPrizes();
             },
 
             updatePointsUI() {
                 const els = ['home-points-display', 'chores-points-display', 'prizes-points-display'];
                 els.forEach(id => {
                     const el = document.getElementById(id);
-                    if (el) el.textContent = id.includes('chores') ? `${this.points} pts` : this.points;
+                    if(el) el.textContent = id.includes('chores') ? `${this.points} pts` : this.points;
                 });
             },
 
             scrollToSection(sectionId) {
                 const element = document.getElementById(sectionId);
-                if (element) element.scrollIntoView({ behavior: 'smooth' });
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
             },
 
-            addChore(title = null, points = null) {
-                const choreTitle = title || document.getElementById('new-chore-title').value.trim();
-                const chorePoints = points || parseInt(document.getElementById('new-chore-points').value);
+            async addChore(title = null, points = null) {
+                const inputTitle = document.getElementById('new-chore-title');
+                const inputPoints = document.getElementById('new-chore-points');
+                
+                const choreTitle = title || inputTitle.value.trim();
+                const chorePoints = points || parseInt(inputPoints.value);
+
                 if (!choreTitle || isNaN(chorePoints) || chorePoints <= 0) {
-                    this.showToast('Please enter a valid chore and points.', 'error');
+                    this.showToast("Please enter a valid chore and points.", "error");
                     return;
                 }
-                if (this.demo) {
-                    const id = 'c-' + Date.now() + '-' + Math.random().toString(36).slice(2,6);
-                    this.chores.push({ id, title: choreTitle, points: chorePoints, status: 'active', timestamp: Date.now() });
-                    this._saveChores();
-                    document.getElementById('new-chore-title').value = '';
-                    document.getElementById('new-chore-points').value = '';
-                    this.showToast(`Added chore: ${choreTitle}`, 'success');
-                    this.renderChores();
-                    return;
-                }
-                if (!this.userId) return;
-                addDoc(collection(this.db, 'artifacts', this.appId, 'users', this.userId, 'chores'), {
+
+                const newChore = {
+                    id: 'chore_' + Date.now(),
                     title: choreTitle,
                     points: chorePoints,
                     status: 'active',
                     timestamp: Date.now()
-                }).then(() => { document.getElementById('new-chore-title').value = ''; document.getElementById('new-chore-points').value = ''; this.showToast(`Added chore: ${choreTitle}`, 'success'); }).catch(() => this.showToast('Failed to add chore.', 'error'));
+                };
+
+                this.chores.unshift(newChore); // Add to top
+                this.saveData();
+
+                if(!title) {
+                    inputTitle.value = '';
+                    inputPoints.value = '';
+                }
+                this.showToast(`Added chore: ${choreTitle}`, "success");
             },
 
-            completeChore(choreId, choreTitle, chorePoints) {
-                if (this.demo) {
-                    const chore = this.chores.find(c => c.id === choreId);
-                    if (!chore) return;
-                    chore.status = 'pending_approval';
-                    this._saveChores();
-                    this.showToast(`Approval requested for ${choreTitle}! Copy the link to send to your parent.`, 'info');
-                    this.renderChores();
-                    return;
+            async completeChore(choreId, choreTitle, chorePoints) {
+                const choreIndex = this.chores.findIndex(c => c.id === choreId);
+                if (choreIndex > -1) {
+                    this.chores[choreIndex].status = 'pending_approval';
+                    this.saveData();
+                    this.showToast(`Approval requested for ${choreTitle}! You can now email your parent.`, "info");
                 }
-                if (!this.userId) return;
-                updateDoc(doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'chores', choreId), { status: 'pending_approval' }).then(() => {
-                    this.showToast(`Approval requested for ${choreTitle}! Copy the link to send to your parent.`, 'info');
-                }).catch(() => this.showToast('Error sending approval request.', 'error'));
             },
 
             copyApprovalLink(choreId, points) {
                 const url = new URL(window.location.href);
                 url.searchParams.set('approve_chore', choreId);
                 url.searchParams.set('pts', points);
-                url.searchParams.set('uid', this.userId);
+                
                 const tempInput = document.createElement('input');
                 tempInput.value = url.toString();
                 document.body.appendChild(tempInput);
                 tempInput.select();
-                try { document.execCommand('copy'); this.showToast('Approval link copied! Send it to your parent.', 'success'); }
-                catch { this.showToast('Failed to copy link.', 'error'); }
+                try {
+                    document.execCommand('copy');
+                    this.showToast("Approval link copied! Send it to your parent.", "success");
+                } catch (err) {
+                    this.showToast("Failed to copy link.", "error");
+                }
                 document.body.removeChild(tempInput);
             },
 
-            async handleParentApproval(choreId, points, targetUid) {
-                if (this.demo) {
-                    if (targetUid !== this.userId) { this.showToast('Approval link invalid for this demo.', 'error'); return; }
-                    const idx = this.chores.findIndex(c => c.id === choreId && c.status === 'pending_approval');
-                    if (idx === -1) { this.showToast('Chore link expired or invalid.', 'error'); return; }
-                    this.chores.splice(idx, 1);
-                    this.points = (this.points || 0) + (points || 0);
-                    this._saveChores();
-                    this._saveProfile();
-                    this.showToast(`Parent Approval Success! ${points} pts awarded! 🎉`, 'success');
-                    this.renderChores();
-                    this.updatePointsUI();
-                    return;
-                }
-                try {
-                    const choreRef = doc(this.db, 'artifacts', this.appId, 'users', targetUid, 'chores', choreId);
-                    const choreSnap = await getDoc(choreRef);
-                    if (choreSnap.exists() && choreSnap.data().status === 'pending_approval') {
-                        await deleteDoc(choreRef);
-                        const profileRef = doc(this.db, 'artifacts', this.appId, 'users', targetUid, 'profile', 'data');
-                        const profileSnap = await getDoc(profileRef);
-                        const currentPoints = profileSnap.exists() ? (profileSnap.data().points || 0) : 0;
-                        await setDoc(profileRef, { points: currentPoints + points }, { merge: true });
-                        this.showToast(`Parent Approval Success! ${points} pts awarded! 🎉`, 'success');
-                    } else { this.showToast('Chore link expired, invalid, or already approved.', 'error'); }
-                } catch (error) {
-                    console.error('Link approval error:', error);
-                    this.showToast('Error approving chore via link.', 'error');
+            async handleParentApproval(choreId, points) {
+                const choreIndex = this.chores.findIndex(c => c.id === choreId);
+                if (choreIndex > -1) {
+                    this.chores.splice(choreIndex, 1); // Remove from list
+                    this.points += points; // Award the points
+                    this.saveData();
+                    this.showToast(`Chore approved! +${points} pts`, "success");
                 }
             },
 
-            approveChore(choreId, points) {
-                if (this.demo) {
-                    const idx = this.chores.findIndex(c => c.id === choreId);
-                    if (idx !== -1) this.chores.splice(idx, 1);
-                    this.points = (this.points || 0) + (points || 0);
-                    this._saveChores();
-                    this._saveProfile();
-                    this.showToast(`Parent approved! Earned ${points} pts! 🎉`, 'success');
-                    this.renderChores();
-                    this.updatePointsUI();
-                    return;
-                }
-                if (!this.userId) return;
-                deleteDoc(doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'chores', choreId)).then(() => {
-                    updateDoc(doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'profile', 'data'), { points: this.points + points }).then(() => this.showToast(`Parent approved! Earned ${points} pts! 🎉`, 'success')).catch(() => this.showToast('Error approving chore.', 'error'));
-                }).catch(() => this.showToast('Error approving chore.', 'error'));
+            async approveChore(choreId, points) {
+                await this.handleParentApproval(choreId, points);
+                this.updateUI();
             },
 
-            saveParentEmail() {
-                const email = document.getElementById('parent-email-input').value.trim();
-                if (!email || !email.includes('@')) { this.showToast('Please enter a valid email address.', 'error'); return; }
-                if (this.demo) {
-                    this.parentEmail = email;
-                    this._saveProfile();
-                    this.showToast('Parent email saved! They will now get approval requests.', 'success');
+            async saveParentEmail(event) {
+                if (event) event.preventDefault(); // Prevents page reload!
+                
+                const emailInput = document.getElementById('parent-email-input').value.trim();
+                
+                if (!emailInput || !emailInput.includes('@')) {
+                    this.showToast("Please enter a valid email address.", "error");
                     return;
                 }
-                if (!this.userId) return;
-                updateDoc(doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'profile', 'data'), { parentEmail: email }).then(() => this.showToast('Parent email saved! They will now get approval requests.', 'success')).catch(() => this.showToast('Failed to save email.', 'error'));
+
+                this.parentEmail = emailInput;
+                this.saveData();
+                this.showToast("Parent email saved!", "success");
+            },
+            
+            // New function to safely open the email draft without navigating away
+            sendEmailDraft(choreId) {
+                const chore = this.chores.find(c => c.id === choreId);
+                if (!chore) return;
+                
+                const url = new URL(window.location.href);
+                url.searchParams.set('approve_chore', chore.id);
+                url.searchParams.set('pts', chore.points);
+                const approvalLink = url.toString();
+                
+                const subject = encodeURIComponent(`Chore Finished: ${chore.title}`);
+                const body = encodeURIComponent(`Hi!\n\nI just finished my chore: ${chore.title}.\nCan you approve it so I get my ${chore.points} points?\n\nClick here to approve: ${approvalLink}`);
+                const mailtoLink = `mailto:${this.parentEmail || ''}?subject=${subject}&body=${body}`;
+                
+                // Opens in a new window/tab so the app doesn't reload
+                window.open(mailtoLink, '_blank');
+                this.showToast("Opening email draft...", "info");
             },
 
             renderChores() {
                 const container = document.getElementById('chore-list-container');
-                if (!container) return;
-                if (!this.chores.length) { container.innerHTML = '<div class="text-center text-gray-300 py-10" id="no-chores-msg">No chores yet! Add some or ask AI for suggestions.</div>'; return; }
+                
+                if (this.chores.length === 0) {
+                    container.innerHTML = '<div class="text-center text-gray-300 py-10" id="no-chores-msg">No chores yet! Add some or ask AI for suggestions.</div>';
+                    return;
+                }
+
                 container.innerHTML = '';
+
                 this.chores.forEach(chore => {
                     const isPending = chore.status === 'pending_approval';
                     const el = document.createElement('div');
-                    el.className = `glass-panel p-4 rounded-xl mb-4 flex justify-between items-center border-l-4 ${isPending ? 'border-orange-400 opacity-70' : 'border-yellow-400'}`;
+                    el.className = `glass-panel p-4 rounded-xl mb-4 flex justify-between items-center animate-fade-in border-l-4 ${isPending ? 'border-orange-400 opacity-70' : 'border-yellow-400'}`;
+                    
                     if (isPending) {
                         el.innerHTML = `
                             <div class="flex-1">
@@ -455,9 +567,17 @@
                                     <span class="text-[10px] uppercase font-bold tracking-wider bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded border border-orange-500/30">Pending</span>
                                 </div>
                             </div>
-                            <div class="flex gap-2 ml-2">
-                                <button onclick="app.copyApprovalLink('${chore.id}', ${chore.points})" class="glass-button bg-purple-500/30 hover:bg-purple-500/60 text-white p-2 px-4 rounded-xl flex items-center gap-2"><i class="fas fa-link mr-2"></i> Copy Link</button>
-                                <button onclick="app.approveChore('${chore.id}', ${chore.points})" class="glass-button bg-blue-500/30 hover:bg-blue-500/60 text-white p-2 px-3 rounded-xl flex items-center justify-center"><i class="fas fa-check-double"></i></button>
+                            <div class="flex gap-2 ml-2 flex-wrap md:flex-nowrap justify-end mt-2 md:mt-0">
+                                <!-- Replaced the link with a safe button click to stop reloads -->
+                                <button onclick="app.sendEmailDraft('${chore.id}')" class="glass-button bg-pink-500/30 hover:bg-pink-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center transition-all text-sm font-bold shadow-lg" title="Email Parent">
+                                    <i class="fas fa-envelope mr-2"></i> Email Parent
+                                </button>
+                                <button onclick="app.copyApprovalLink('${chore.id}', ${chore.points})" class="glass-button bg-purple-500/30 hover:bg-purple-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center transition-all text-sm font-bold shadow-lg" title="Copy Approval Link for Parent">
+                                    <i class="fas fa-link mr-2"></i> Copy Link
+                                </button>
+                                <button onclick="app.approveChore('${chore.id}', ${chore.points})" class="glass-button bg-blue-500/30 hover:bg-blue-500/60 text-white p-2 px-3 rounded-xl flex items-center justify-center transition-all text-sm font-bold shadow-lg" title="Manual Approve (For testing)">
+                                    <i class="fas fa-check-double"></i> Approve
+                                </button>
                             </div>
                         `;
                     } else {
@@ -466,7 +586,9 @@
                                 <h4 class="text-lg font-semibold">${chore.title}</h4>
                                 <p class="text-sm text-yellow-300 font-bold">${chore.points} pts</p>
                             </div>
-                            <button onclick="app.completeChore('${chore.id}', '${String(chore.title).replace(/'/g, "\\'")}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-xl flex items-center justify-center"><i class="fas fa-check text-xl"></i></button>
+                            <button onclick="app.completeChore('${chore.id}', '${chore.title.replace(/'/g, "\\'")}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-full flex items-center justify-center transition-all group" title="Finish Chore">
+                                <i class="fas fa-check text-xl group-hover:scale-125 transition-transform"></i>
+                            </button>
                         `;
                     }
                     container.appendChild(el);
@@ -475,58 +597,67 @@
 
             renderPrizes() {
                 const container = document.getElementById('available-prizes-container');
-                if (!container) return;
                 container.innerHTML = '';
+                
                 this.defaultPrizes.forEach(prize => {
                     const el = document.createElement('div');
-                    el.className = 'glass-panel p-6 rounded-2xl flex flex-col items-center text-center transition-transform hover:-translate-y-2 group relative overflow-hidden';
+                    el.className = "glass-panel p-6 rounded-2xl flex flex-col items-center text-center transition-transform hover:-translate-y-2 group relative overflow-hidden";
+                    
                     const canAfford = this.points >= prize.cost;
                     const btnClass = canAfford ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : 'glass-button opacity-50 cursor-not-allowed';
+
                     el.innerHTML = `
                         <div class="absolute -right-4 -top-4 w-20 h-20 ${prize.color} rounded-full opacity-20 blur-xl group-hover:opacity-40 transition-opacity"></div>
                         <i class="fas ${prize.icon} text-4xl mb-4 text-white drop-shadow-lg"></i>
                         <h4 class="text-lg font-bold mb-2 leading-tight">${prize.title}</h4>
                         <div class="mt-auto w-full pt-4">
                             <p class="text-yellow-300 font-bold mb-3">${prize.cost} pts</p>
-                            <button ${!canAfford ? 'disabled' : ''} onclick="app.redeemPrize('${prize.id}')" class="w-full py-2 rounded-xl font-bold transition-all ${btnClass}">${canAfford ? 'Redeem' : 'Need more pts'}</button>
+                            <button ${!canAfford ? 'disabled' : ''} onclick="app.redeemPrize('${prize.id}')" class="w-full py-2 rounded-xl font-bold transition-all ${btnClass}">
+                                ${canAfford ? 'Redeem' : 'Need more pts'}
+                            </button>
                         </div>
                     `;
                     container.appendChild(el);
                 });
             },
 
-            redeemPrize(prizeId) {
+            async redeemPrize(prizeId) {
                 const prize = this.defaultPrizes.find(p => p.id === prizeId);
                 if (!prize) return;
-                if (this.points < prize.cost) { this.showToast('Not enough points!', 'error'); return; }
-                if (this.demo) {
-                    this.points -= prize.cost;
-                    this.redeemedPrizes.unshift({ id: 'r-' + Date.now(), title: prize.title, icon: prize.icon, cost: prize.cost, timestamp: Date.now() });
-                    this._saveProfile();
-                    this._saveRedeemed();
-                    this.showToast(`Redeemed ${prize.title}! 🎉`, 'success');
-                    this.renderPrizes();
-                    this.renderRedeemedPrizes();
-                    this.updatePointsUI();
+
+                if (this.points < prize.cost) {
+                    this.showToast("Not enough points!", "error");
                     return;
                 }
-                if (!this.userId) return;
-                updateDoc(doc(this.db, 'artifacts', this.appId, 'users', this.userId, 'profile', 'data'), { points: this.points - prize.cost }).then(() => {
-                    addDoc(collection(this.db, 'artifacts', this.appId, 'users', this.userId, 'redeemed_prizes'), { title: prize.title, icon: prize.icon, cost: prize.cost, timestamp: Date.now() }).then(() => this.showToast(`Redeemed ${prize.title}! 🎉`, 'success')).catch(() => this.showToast('Error redeeming prize.', 'error'));
-                }).catch(() => this.showToast('Error redeeming prize.', 'error'));
+
+                this.points -= prize.cost;
+                this.redeemedPrizes.unshift({
+                    title: prize.title,
+                    icon: prize.icon,
+                    cost: prize.cost,
+                    timestamp: Date.now()
+                });
+                
+                this.saveData();
+                this.showToast(`Redeemed ${prize.title}! 🎉`, "success");
             },
 
             renderRedeemedPrizes() {
                 const container = document.getElementById('redeemed-prizes-container');
-                if (!container) return;
-                if (!this.redeemedPrizes.length) { container.innerHTML = '<p class="text-gray-300 col-span-full">No prizes redeemed yet. Start doing chores!</p>'; return; }
+                if (this.redeemedPrizes.length === 0) {
+                    container.innerHTML = '<p class="text-gray-300 col-span-full'>No prizes redeemed yet. Start doing chores!</p>';
+                    return;
+                }
+
                 container.innerHTML = '';
                 this.redeemedPrizes.forEach(prize => {
                     const date = new Date(prize.timestamp).toLocaleDateString();
                     const el = document.createElement('div');
-                    el.className = 'glass-panel p-4 rounded-xl flex items-center gap-4 opacity-80';
+                    el.className = "glass-panel p-4 rounded-xl flex items-center gap-4 opacity-80";
                     el.innerHTML = `
-                        <div class="w-12 h-12 rounded-full glass flex items-center justify-center"><i class="fas ${prize.icon} text-xl text-yellow-300"></i></div>
+                        <div class="w-12 h-12 rounded-full glass flex items-center justify-center">
+                            <i class="fas ${prize.icon} text-xl text-yellow-300"></i>
+                        </div>
                         <div>
                             <h4 class="font-bold text-sm">${prize.title}</h4>
                             <p class="text-xs text-gray-300">Redeemed: ${date}</p>
@@ -536,46 +667,30 @@
                 });
             },
 
-            suggestChores() {
+            async suggestChores() {
                 const btn = document.getElementById('btn-suggest-chores');
                 btn.innerHTML = '<div class="loader w-5 h-5 border-2"></div> <span>Generating...</span>';
                 btn.disabled = true;
+
                 try {
-                    if (this.demo) {
-                        const samples = [
-                            { title: 'Treasure Hunt Cleanup (Collect 10 items)', points: 60 },
-                            { title: 'Toy Sorting Challenge', points: 40 },
-                            { title: 'Window Art (wipe & decorate)', points: 30 }
-                        ];
-                        for (const chore of samples) this.addChore(chore.title, chore.points);
-                        this.showToast('Added 3 demo chores!', 'success');
-                        btn.innerHTML = '<span>Suggest Fun Chores</span>';
-                        btn.disabled = false;
-                        return;
+                    // Simulating AI request for static deployment without backend API keys
+                    await new Promise(r => setTimeout(r, 1500));
+                    
+                    const backups = [
+                        {title: "Wipe Doorknobs Clean", points: 10},
+                        {title: "Hunt Dust Bunnies", points: 15},
+                        {title: "Organize Shoe Station", points: 20}
+                    ];
+
+                    for (const chore of backups) {
+                        await this.addChore(chore.title, chore.points);
                     }
-                    const prompt = "Act as an expert in child psychology and gamification. Suggest 3 fun, slightly unconventional, and highly engaging household chores for kids to do. Return ONLY a valid JSON array of objects with 'title' and 'points' fields. Use point values between 20 and 200.";
-                    const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } };
-                    const apiKey = '';
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-                    fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-                    .then(res => res.ok ? res.json() : Promise.reject(new Error('API Network error')))
-                    .then(result => {
-                        const textContent = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                        if (!textContent) throw new Error('No content generated');
-                        const cleanJson = textContent.replace(/```json\n|\n```/g, '');
-                        const suggestions = JSON.parse(cleanJson);
-                        return Promise.all(suggestions.map(chore => this.addChore(chore.title, chore.points)));
-                    }).then(() => {
-                        this.showToast('Added 3 AI-suggested chores!', 'success');
-                    }).catch(() => {
-                        this.showToast('Failed to generate AI chores. Try again.', 'error');
-                    }).finally(() => {
-                        btn.innerHTML = '<span>Suggest Fun Chores</span>';
-                        btn.disabled = false;
-                    });
+                    this.showToast("Added 3 suggested chores!", "success");
+
                 } catch (error) {
-                    console.error('Gemini API Error:', error);
-                    this.showToast('Failed to generate AI chores. Try again.', 'error');
+                    console.error("Error:", error);
+                    this.showToast("Failed to generate chores.", "error");
+                } finally {
                     btn.innerHTML = '<span>Suggest Fun Chores</span>';
                     btn.disabled = false;
                 }
@@ -585,15 +700,27 @@
                 const container = document.getElementById('toast-container');
                 const toast = document.createElement('div');
                 const icon = type === 'success' ? 'fa-check-circle text-green-400' : (type === 'error' ? 'fa-exclamation-circle text-red-400' : 'fa-info-circle text-blue-400');
-                toast.className = 'glass-panel px-6 py-4 rounded-xl flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300 shadow-xl border-t border-l border-white/20';
+                
+                toast.className = `glass-panel px-6 py-4 rounded-xl flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300 shadow-xl border-t border-l border-white/20`;
                 toast.innerHTML = `<i class="fas ${icon} text-xl"></i> <span class="font-semibold">${message}</span>`;
+                
                 container.appendChild(toast);
-                setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
-                setTimeout(() => { toast.classList.add('opacity-0', 'translate-x-10'); setTimeout(() => toast.remove(), 300); }, 3000);
+                
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-10', 'opacity-0');
+                }, 10);
+
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-x-10');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => app.init());
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
     </script>
 </body>
 </html>
