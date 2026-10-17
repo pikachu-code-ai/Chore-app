@@ -175,7 +175,9 @@
                 <!-- Added a form wrapper that prevents the default page reload -->
                 <form onsubmit="app.submitInitialParentEmail(event); return false;" class="w-full">
                     <input type="email" id="onboarding-email-input" placeholder="parent@example.com" class="w-full px-4 py-3 rounded-xl glass-input mb-4 text-center">
-                    <button type="submit" class="w-full glass-button bg-yellow-400/20 hover:bg-yellow-400/40 text-yellow-100 rounded-xl py-3 font-bold transition-all border border-yellow-400/50 shadow-lg">Let's Go!</button>
+                    <button type="submit" class="w-full glass-button bg-yellow-400/20 hover:bg-yellow-400/40 text-yellow-100 rounded-xl py-3 font-bold transition-all border border-yellow-400/50">
+                        Save Parent Email
+                    </button>
                 </form>
             </div>
         </div>
@@ -396,7 +398,7 @@
             },
 
             submitInitialParentEmail(event) {
-                if (event) event.preventDefault(); // Prevents the page from reloading when you press Enter!
+                if (event) event.preventDefault();
                 
                 const emailInput = document.getElementById('onboarding-email-input').value.trim();
                 if (!emailInput || !emailInput.includes('@')) {
@@ -494,6 +496,16 @@
                 document.body.removeChild(tempInput);
             },
 
+            deletePendingChore(choreId) {
+                const choreIndex = this.chores.findIndex(c => c.id === choreId);
+                if (choreIndex === -1) return;
+
+                const chore = this.chores[choreIndex];
+                this.chores.splice(choreIndex, 1);
+                this.saveData();
+                this.showToast(`Deleted pending chore: ${chore.title}`, "info");
+            },
+
             async handleParentApproval(choreId, points) {
                 const choreIndex = this.chores.findIndex(c => c.id === choreId);
                 if (choreIndex > -1) {
@@ -510,7 +522,7 @@
             },
 
             async saveParentEmail(event) {
-                if (event) event.preventDefault(); // Prevents page reload!
+                if (event) event.preventDefault();
                 
                 const emailInput = document.getElementById('parent-email-input').value.trim();
                 
@@ -556,7 +568,7 @@
                 this.chores.forEach(chore => {
                     const isPending = chore.status === 'pending_approval';
                     const el = document.createElement('div');
-                    el.className = `glass-panel p-4 rounded-xl mb-4 flex justify-between items-center animate-fade-in border-l-4 ${isPending ? 'border-orange-400 opacity-70' : 'border-yellow-400'}`;
+                    el.className = `glass-panel p-4 rounded-xl mb-4 flex justify-between items-center animate-fade-in border-l-4 ${isPending ? 'border-orange-400 opacity-70' : 'border-yellow-400'} `;
                     
                     if (isPending) {
                         el.innerHTML = `
@@ -568,14 +580,17 @@
                                 </div>
                             </div>
                             <div class="flex gap-2 ml-2 flex-wrap md:flex-nowrap justify-end mt-2 md:mt-0">
-                                <!-- Replaced the link with a safe button click to stop reloads -->
-                                <button onclick="app.sendEmailDraft('${chore.id}')" class="glass-button bg-pink-500/30 hover:bg-pink-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center transition-all text-sm font-bold shadow-lg" title="Email Parent">
+                                <!-- Added a delete button so a pending chore can be removed if the parent does not approve it -->
+                                <button onclick="app.sendEmailDraft('${chore.id}')" class="glass-button bg-pink-500/30 hover:bg-pink-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center">
                                     <i class="fas fa-envelope mr-2"></i> Email Parent
                                 </button>
-                                <button onclick="app.copyApprovalLink('${chore.id}', ${chore.points})" class="glass-button bg-purple-500/30 hover:bg-purple-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center transition-all text-sm font-bold shadow-lg" title="Copy Approval Link for Parent">
+                                <button onclick="app.copyApprovalLink('${chore.id}', ${chore.points})" class="glass-button bg-purple-500/30 hover:bg-purple-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center">
                                     <i class="fas fa-link mr-2"></i> Copy Link
                                 </button>
-                                <button onclick="app.approveChore('${chore.id}', ${chore.points})" class="glass-button bg-blue-500/30 hover:bg-blue-500/60 text-white p-2 px-3 rounded-xl flex items-center justify-center transition-all text-sm font-bold shadow-lg" title="Manual Approve (For testing)">
+                                <button onclick="app.deletePendingChore('${chore.id}')" class="glass-button bg-red-500/30 hover:bg-red-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-trash mr-2"></i> Delete
+                                </button>
+                                <button onclick="app.approveChore('${chore.id}', ${chore.points})" class="glass-button bg-blue-500/30 hover:bg-blue-500/60 text-white p-2 px-3 rounded-xl flex items-center justify-center">
                                     <i class="fas fa-check-double"></i> Approve
                                 </button>
                             </div>
@@ -586,7 +601,7 @@
                                 <h4 class="text-lg font-semibold">${chore.title}</h4>
                                 <p class="text-sm text-yellow-300 font-bold">${chore.points} pts</p>
                             </div>
-                            <button onclick="app.completeChore('${chore.id}', '${chore.title.replace(/'/g, "\\'")}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-full flex items-center justify-center transition-all group" title="Finish Chore">
+                            <button onclick="app.completeChore('${chore.id}', '${chore.title.replace(/'/g, "\\'")}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-xl flex items-center justify-center group">
                                 <i class="fas fa-check text-xl group-hover:scale-125 transition-transform"></i>
                             </button>
                         `;
@@ -701,7 +716,7 @@
                 const toast = document.createElement('div');
                 const icon = type === 'success' ? 'fa-check-circle text-green-400' : (type === 'error' ? 'fa-exclamation-circle text-red-400' : 'fa-info-circle text-blue-400');
                 
-                toast.className = `glass-panel px-6 py-4 rounded-xl flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300 shadow-xl border-t border-l border-white/20`;
+                toast.className = `glass-panel px-6 py-4 rounded-xl flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300 shadow-xl border-t border-l border-white/10`;
                 toast.innerHTML = `<i class="fas ${icon} text-xl"></i> <span class="font-semibold">${message}</span>`;
                 
                 container.appendChild(toast);
