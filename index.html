@@ -405,6 +405,38 @@
                 { id: 'p6', title: 'Skip One Chore', cost: 300, icon: 'fa-forward-step', color: 'bg-teal-500' }
             ],
 
+            choreSuggestionPool: [
+                { title: 'Vacuum the Living Room', points: 25 },
+                { title: 'Fold Laundry and Put It Away', points: 20 },
+                { title: 'Wipe Down Kitchen Counters', points: 15 },
+                { title: 'Clean the Bathroom Sink', points: 20 },
+                { title: 'Take Out the Trash', points: 10 },
+                { title: 'Water the Plants', points: 12 },
+                { title: 'Organize the Shoe Rack', points: 18 },
+                { title: 'Dust the Bedroom', points: 22 },
+                { title: 'Make the Bed Neatly', points: 15 },
+                { title: 'Sweep the Porch', points: 18 },
+                { title: 'Unload the Dishwasher', points: 20 },
+                { title: 'Put Away Toys', points: 15 },
+                { title: 'Clean the Mirrors', points: 17 },
+                { title: 'Tidy Desk and School Supplies', points: 25 },
+                { title: 'Help Sort Recycling', points: 12 },
+                { title: 'Wipe Down Doorknobs', points: 14 },
+                { title: 'Feed the Pets', points: 10 },
+                { title: 'Vacuum the Car Seats', points: 28 },
+                { title: 'Straighten the Bookshelf', points: 20 },
+                { title: 'Clean the Front Entryway', points: 18 }
+            ],
+
+            getRandomizedSuggestions(count = 3) {
+                const pool = [...this.choreSuggestionPool];
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+                return pool.slice(0, Math.min(count, pool.length));
+            },
+
             hasParentEmail() {
                 return !!this.parentEmail && this.parentEmail.includes('@');
             },
@@ -842,18 +874,13 @@
                 btn.disabled = true;
 
                 try {
-                    await new Promise(r => setTimeout(r, 1500));
+                    await new Promise(r => setTimeout(r, 1200));
+                    const suggestions = this.getRandomizedSuggestions(3);
 
-                    const backups = [
-                        { title: 'Wipe Doorknobs Clean', points: 10 },
-                        { title: 'Hunt Dust Bunnies', points: 15 },
-                        { title: 'Organize Shoe Station', points: 20 }
-                    ];
-
-                    for (const chore of backups) {
+                    for (const chore of suggestions) {
                         await this.addChore(chore.title, chore.points);
                     }
-                    this.showToast('Added 3 suggested chores!', 'success');
+                    this.showToast(`Added ${suggestions.length} fresh suggestions!`, 'success');
                 } catch (error) {
                     console.error('Error:', error);
                     this.showToast('Failed to generate chores.', 'error');
