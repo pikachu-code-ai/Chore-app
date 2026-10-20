@@ -1,24 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kaching - Chore Rewards</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-1: #ee7752;
+            --bg-2: #e73c7e;
+            --bg-3: #23a6d5;
+            --bg-4: #23d5ab;
+        }
 
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            /* Vibrant animated gradient background */
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background: linear-gradient(-45deg, var(--bg-1), var(--bg-2), var(--bg-3), var(--bg-4));
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
-            height: 100vh;
+            min-height: 100vh;
             color: #ffffff;
         }
 
@@ -28,7 +34,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Glassmorphism utility classes */
         .glass {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(12px);
@@ -49,7 +54,7 @@
             border: 1px solid rgba(255, 255, 255, 0.4);
             transition: all 0.3s ease;
         }
-        
+
         .glass-button:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
@@ -64,7 +69,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
         }
-        
+
         .glass-input::placeholder {
             color: rgba(255, 255, 255, 0.7);
         }
@@ -75,7 +80,6 @@
             border-color: rgba(255, 255, 255, 0.6);
         }
 
-        /* Scrollbar styling for glass look */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -91,16 +95,15 @@
             background: rgba(255, 255, 255, 0.5);
         }
 
-        /* Logo Animation */
         .logo-bounce {
             animation: bounce 2s infinite ease-in-out;
         }
+
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
 
-        /* Loader */
         .loader {
             border: 4px solid rgba(255, 255, 255, 0.3);
             border-top: 4px solid white;
@@ -110,12 +113,12 @@
             animation: spin 1s linear infinite;
             display: inline-block;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        /* Navbar */
         .glass-nav {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(16px);
@@ -125,8 +128,6 @@
     </style>
 </head>
 <body class="flex flex-col min-h-screen w-full antialiased text-white">
-
-    <!-- Top Navigation -->
     <header class="glass-nav fixed top-0 w-full z-40 px-6 py-4 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
             <div class="w-10 h-10 rounded-xl shadow-lg bg-white flex items-center justify-center text-yellow-500 text-xl">
@@ -134,7 +135,7 @@
             </div>
             <h1 class="text-2xl font-bold tracking-wider" style="text-shadow: 0 2px 10px rgba(0,0,0,0.3);">Kaching</h1>
         </div>
-        
+
         <nav class="hidden md:flex gap-6">
             <button onclick="app.scrollToSection('view-home')" class="hover:text-yellow-300 font-semibold transition-colors">Home</button>
             <button onclick="app.scrollToSection('view-chores')" class="hover:text-yellow-300 font-semibold transition-colors">Chores</button>
@@ -154,16 +155,12 @@
         </div>
     </header>
 
-    <!-- Main Content Area -->
     <main class="flex-1 w-full max-w-6xl mx-auto px-4 md:px-8 pt-28 pb-12 relative flex flex-col gap-12 md:gap-24">
-        
-        <!-- Loading Overlay -->
         <div id="loading-overlay" class="fixed inset-0 glass z-50 flex flex-col items-center justify-center m-4 rounded-3xl md:m-8">
             <div class="loader mb-4 border-t-yellow-400 w-12 h-12 border-4"></div>
             <p class="text-xl font-semibold animate-pulse">Loading Kaching...</p>
         </div>
 
-        <!-- Parent Email Onboarding Modal -->
         <div id="email-onboarding-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden">
             <div class="glass-panel p-8 rounded-3xl max-w-md w-full mx-4 border-t border-white/20 shadow-2xl text-center">
                 <div class="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center text-yellow-600 text-3xl mx-auto mb-4 shadow-lg">
@@ -171,10 +168,9 @@
                 </div>
                 <h2 class="text-2xl font-bold mb-2">Welcome to Kaching!</h2>
                 <p class="text-gray-200 mb-6">Before we start earning points, let's set up your parent's email so they can approve your chores.</p>
-                
-                <!-- Added a form wrapper that prevents the default page reload -->
+
                 <form onsubmit="app.submitInitialParentEmail(event); return false;" class="w-full">
-                    <input type="email" id="onboarding-email-input" placeholder="parent@example.com" class="w-full px-4 py-3 rounded-xl glass-input mb-4 text-center">
+                    <input type="email" id="onboarding-email-input" placeholder="parent@example.com" class="w-full px-4 py-3 rounded-xl glass-input mb-4 text-center" />
                     <button type="submit" class="w-full glass-button bg-yellow-400/20 hover:bg-yellow-400/40 text-yellow-100 rounded-xl py-3 font-bold transition-all border border-yellow-400/50">
                         Save Parent Email
                     </button>
@@ -182,159 +178,155 @@
             </div>
         </div>
 
-        <!-- HOME SECTION -->
         <section id="view-home" class="min-h-[70vh] flex flex-col justify-center glass rounded-3xl p-6 md:p-10 shadow-2xl scroll-mt-28">
             <header class="mb-10 flex justify-between items-center flex-wrap gap-4">
-                    <div>
-                        <h2 class="text-4xl font-bold mb-2">Welcome Back! 👋</h2>
-                        <p class="text-lg text-gray-200">Ready to earn some rewards today?</p>
-                    </div>
-                    <div class="glass-panel px-6 py-4 rounded-2xl flex items-center gap-4 shadow-lg border-yellow-400/30 border-2">
-                        <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center text-yellow-600 text-2xl shadow-inner">
-                            <i class="fas fa-coins"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-yellow-200 uppercase tracking-wider">Total Points</p>
-                            <p class="text-4xl font-bold text-white" id="home-points-display">0</p>
-                        </div>
-                    </div>
-                </header>
-
-                <div class="flex-1 flex flex-col items-center justify-center opacity-80 mt-8">
-                    <!-- Conceptual Logo Display -->
-                    <div class="relative w-64 h-64 logo-bounce mb-8">
-                        <div class="absolute inset-0 bg-yellow-400 rounded-full blur-3xl opacity-30"></div>
-                        <div class="w-full h-full rounded-3xl relative z-10 bg-white/10 backdrop-blur-sm p-4 flex items-center justify-center border border-white/20 shadow-2xl">
-                            <i class="fas fa-piggy-bank text-9xl text-yellow-400 drop-shadow-2xl"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-2">Do Chores. Earn Rewards.</h3>
-                    <p class="text-center max-w-md text-gray-200">Scroll down to see what needs to be done, or check out the prizes you can claim!</p>
+                <div>
+                    <h2 class="text-4xl font-bold mb-2">Welcome Back! 👋</h2>
+                    <p class="text-lg text-gray-200">Ready to earn some rewards today?</p>
                 </div>
+                <div class="glass-panel px-6 py-4 rounded-2xl flex items-center gap-4 shadow-lg border-yellow-400/30 border-2">
+                    <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center text-yellow-600 text-2xl shadow-inner">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-yellow-200 uppercase tracking-wider">Total Points</p>
+                        <p class="text-4xl font-bold text-white" id="home-points-display">0</p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex-1 flex flex-col items-center justify-center opacity-80 mt-8">
+                <div class="relative w-64 h-64 logo-bounce mb-8">
+                    <div class="absolute inset-0 bg-yellow-400 rounded-full blur-3xl opacity-30"></div>
+                    <div class="w-full h-full rounded-3xl relative z-10 bg-white/10 backdrop-blur-sm p-4 flex items-center justify-center border border-white/20 shadow-2xl">
+                        <i class="fas fa-piggy-bank text-9xl text-yellow-400 drop-shadow-2xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">Do Chores. Earn Rewards.</h3>
+                <p class="text-center max-w-md text-gray-200">Scroll down to see what needs to be done, or check out the prizes you can claim!</p>
+            </div>
         </section>
 
-        <!-- CHORES SECTION -->
         <section id="view-chores" class="flex flex-col glass rounded-3xl p-6 md:p-10 shadow-2xl scroll-mt-28">
             <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
                 <h2 class="text-4xl font-bold"><i class="fas fa-clipboard-list mr-3"></i>Your Chores</h2>
-                    <div class="glass-panel px-4 py-2 rounded-xl">
-                        <span class="text-yellow-300 font-bold" id="chores-points-display">0 pts</span> available
+                <div class="glass-panel px-4 py-2 rounded-xl">
+                    <span class="text-yellow-300 font-bold" id="chores-points-display">0 pts</span> available
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1 overflow-hidden">
+                <div class="lg:col-span-2 flex flex-col h-full">
+                    <div class="glass-panel rounded-2xl p-6 flex-1 overflow-y-auto" id="chore-list-container">
+                        <div class="text-center text-gray-300 py-10" id="no-chores-msg">No chores yet! Add some or ask AI for suggestions.</div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1 overflow-hidden">
-                    <!-- Chore List -->
-                    <div class="lg:col-span-2 flex flex-col h-full">
-                        <div class="glass-panel rounded-2xl p-6 flex-1 overflow-y-auto" id="chore-list-container">
-                            <!-- Chores injected here -->
-                            <div class="text-center text-gray-300 py-10" id="no-chores-msg">
-                                No chores yet! Add some or ask AI for suggestions.
-                            </div>
+                <div class="flex flex-col gap-6">
+                    <div class="glass-panel rounded-2xl p-6">
+                        <h3 class="text-xl font-bold mb-4">Add a Chore</h3>
+                        <input type="text" id="new-chore-title" placeholder="Chore Name (e.g. Clean Room)" class="w-full px-4 py-3 rounded-xl glass-input mb-4" />
+                        <div class="flex gap-4 mb-4">
+                            <input type="number" id="new-chore-points" placeholder="Points" class="w-1/2 px-4 py-3 rounded-xl glass-input" />
+                            <button type="button" onclick="app.addChore()" class="w-1/2 glass-button bg-green-500/30 hover:bg-green-500/50 rounded-xl font-bold">Add</button>
                         </div>
                     </div>
 
-                    <!-- Add Chore / AI Actions -->
-                    <div class="flex flex-col gap-6">
-                        <div class="glass-panel rounded-2xl p-6">
-                            <h3 class="text-xl font-bold mb-4">Add a Chore</h3>
-                            <input type="text" id="new-chore-title" placeholder="Chore Name (e.g. Clean Room)" class="w-full px-4 py-3 rounded-xl glass-input mb-4">
-                            <div class="flex gap-4 mb-4">
-                                <input type="number" id="new-chore-points" placeholder="Points" class="w-1/2 px-4 py-3 rounded-xl glass-input">
-                                <button type="button" onclick="app.addChore()" class="w-1/2 glass-button bg-green-500/30 hover:bg-green-500/50 rounded-xl font-bold">Add</button>
-                            </div>
-                        </div>
-
-                        <div class="glass-panel rounded-2xl p-6 bg-gradient-to-br from-indigo-600/30 to-purple-600/30 border-purple-400/40">
-                            <h3 class="text-xl font-bold mb-2 flex items-center gap-2">
-                                <i class="fas fa-magic text-yellow-300"></i> AI Suggestions
-                            </h3>
-                            <p class="text-sm text-gray-200 mb-4">Need ideas? Let Gemini suggest fun chores!</p>
-                            <button type="button" onclick="app.suggestChores()" id="btn-suggest-chores" class="w-full glass-button bg-white/20 hover:bg-white/30 rounded-xl py-3 font-bold flex justify-center items-center gap-2">
-                                <span>Suggest Fun Chores</span>
-                            </button>
-                        </div>
+                    <div class="glass-panel rounded-2xl p-6 bg-gradient-to-br from-indigo-600/30 to-purple-600/30 border-purple-400/40">
+                        <h3 class="text-xl font-bold mb-2 flex items-center gap-2">
+                            <i class="fas fa-magic text-yellow-300"></i> AI Suggestions
+                        </h3>
+                        <p class="text-sm text-gray-200 mb-4">Need ideas? Let Gemini suggest fun chores!</p>
+                        <button type="button" onclick="app.suggestChores()" id="btn-suggest-chores" class="w-full glass-button bg-white/20 hover:bg-white/30 rounded-xl py-3 font-bold flex justify-center items-center gap-2">
+                            <span>Suggest Fun Chores</span>
+                        </button>
                     </div>
-                </div>
-        </section>
-
-        <!-- PRIZES SECTION -->
-        <section id="view-prizes" class="flex flex-col glass rounded-3xl p-6 md:p-10 shadow-2xl scroll-mt-28">
-             <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
-                <h2 class="text-4xl font-bold"><i class="fas fa-trophy text-yellow-400 mr-3"></i>Prize Room</h2>
-                    <div class="glass-panel px-6 py-3 rounded-2xl border-yellow-400/50 border shadow-[0_0_15px_rgba(250,204,21,0.3)]">
-                        <span class="text-sm uppercase tracking-wider text-gray-200 block text-center">Your Balance</span>
-                        <span class="text-3xl font-bold text-yellow-300" id="prizes-points-display">0</span> <span class="text-yellow-100">pts</span>
-                    </div>
-                </div>
-
-                <div class="flex-1 overflow-y-auto pr-2 pb-10">
-                    <h3 class="text-2xl font-semibold mb-4 border-b border-white/20 pb-2">Available Prizes</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12" id="available-prizes-container">
-                        <!-- Prizes injected here -->
-                    </div>
-
-                    <h3 class="text-2xl font-semibold mb-4 border-b border-white/20 pb-2 mt-8">Your Redeemed Prizes</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="redeemed-prizes-container">
-                    <!-- Redeemed prizes injected here -->
                 </div>
             </div>
         </section>
 
-        <!-- ETC SECTION -->
+        <section id="view-prizes" class="flex flex-col glass rounded-3xl p-6 md:p-10 shadow-2xl scroll-mt-28">
+            <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
+                <h2 class="text-4xl font-bold"><i class="fas fa-trophy text-yellow-400 mr-3"></i>Prize Room</h2>
+                <div class="glass-panel px-6 py-3 rounded-2xl border-yellow-400/50 border shadow-[0_0_15px_rgba(250,204,21,0.3)]">
+                    <span class="text-sm uppercase tracking-wider text-gray-200 block text-center">Your Balance</span>
+                    <span class="text-3xl font-bold text-yellow-300" id="prizes-points-display">0</span> <span class="text-yellow-100">pts</span>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto pr-2 pb-10">
+                <h3 class="text-2xl font-semibold mb-4 border-b border-white/20 pb-2">Available Prizes</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12" id="available-prizes-container"></div>
+
+                <h3 class="text-2xl font-semibold mb-4 border-b border-white/20 pb-2 mt-8">Your Redeemed Prizes</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="redeemed-prizes-container"></div>
+            </div>
+        </section>
+
         <section id="view-etc" class="flex flex-col items-center justify-center glass rounded-3xl p-6 md:p-10 shadow-2xl scroll-mt-28">
             <div class="w-full max-w-md">
                 <h2 class="text-3xl font-bold mb-6 text-center"><i class="fas fa-cog mr-3"></i>Settings & More</h2>
-                    
-                    <div class="glass-panel p-6 rounded-2xl mb-6">
-                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
-                            <i class="fas fa-shield-alt text-blue-400"></i> Parental Controls
-                        </h3>
-                        <p class="text-sm text-gray-200 mb-4">Set a parent's email address to receive chore approval requests when chores are finished.</p>
-                        
-                        <!-- Added a form wrapper here too to prevent reloading -->
-                        <form onsubmit="app.saveParentEmail(event); return false;" class="flex flex-col gap-3">
-                            <input type="email" id="parent-email-input" placeholder="parent@email.com" class="w-full px-4 py-3 rounded-xl glass-input">
-                            <button type="submit" class="w-full glass-button bg-blue-500/30 hover:bg-blue-500/50 rounded-xl py-3 font-bold">
-                                Save Email
-                            </button>
-                        </form>
-                    </div>
-                    </div>
 
-                    <div class="glass-panel p-6 rounded-2xl text-center">
-                        <h3 class="text-xl font-bold mb-2">App Info</h3>
-                        <p class="text-sm text-gray-300 mb-1">Version: 1.1 (Parental Updates)</p>
-                        <p class="text-sm text-gray-300">Powered by Firebase & Gemini API</p>
-                    </div>
+                <div class="glass-panel p-6 rounded-2xl mb-6">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <i class="fas fa-shield-alt text-blue-400"></i> Parental Controls
+                    </h3>
+                    <p class="text-sm text-gray-200 mb-4">Set a parent's email address to receive chore approval requests when chores are finished.</p>
+
+                    <form onsubmit="app.saveParentEmail(event); return false;" class="flex flex-col gap-3">
+                        <input type="email" id="parent-email-input" placeholder="parent@email.com" class="w-full px-4 py-3 rounded-xl glass-input" />
+                        <button type="submit" class="w-full glass-button bg-blue-500/30 hover:bg-blue-500/50 rounded-xl py-3 font-bold">
+                            Save Email
+                        </button>
+                    </form>
                 </div>
+
+                <div class="glass-panel p-6 rounded-2xl text-center">
+                    <h3 class="text-xl font-bold mb-2">App Info</h3>
+                    <p class="text-sm text-gray-300 mb-1">Version: 1.2 (Improved UX)</p>
+                    <p class="text-sm text-gray-300">Powered by Firebase & Gemini API</p>
+                </div>
+            </div>
         </section>
 
-        <!-- Toast Notification Container -->
         <div id="toast-container" class="fixed bottom-8 right-8 z-50 flex flex-col gap-3"></div>
-
     </main>
 
     <script>
-        // Global App State & Logic (Using LocalStorage - No Login Required!)
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function normalizeEmail(value) {
+            return String(value || '').trim().toLowerCase();
+        }
+
         window.app = {
             points: 0,
             parentEmail: null,
             chores: [],
             redeemedPrizes: [],
-            
-            // Default Prizes
+
             defaultPrizes: [
                 { id: 'p1', title: 'Extra Screen Time (30m)', cost: 50, icon: 'fa-gamepad', color: 'bg-blue-500' },
                 { id: 'p2', title: 'Pick Movie Night', cost: 100, icon: 'fa-film', color: 'bg-purple-500' },
                 { id: 'p3', title: 'New Toy ($10)', cost: 500, icon: 'fa-rocket', color: 'bg-red-500' },
                 { id: 'p4', title: 'Stay Up Late (1hr)', cost: 200, icon: 'fa-moon', color: 'bg-indigo-500' },
                 { id: 'p5', title: 'Ice Cream Trip', cost: 150, icon: 'fa-ice-cream', color: 'bg-pink-500' },
-                { id: 'p6', title: 'Skip One Chore', cost: 300, icon: 'fa-forward-step', color: 'bg-teal-500' },
+                { id: 'p6', title: 'Skip One Chore', cost: 300, icon: 'fa-forward-step', color: 'bg-teal-500' }
             ],
+
+            hasParentEmail() {
+                return !!this.parentEmail && this.parentEmail.includes('@');
+            },
 
             async init() {
                 try {
-                    // Load saved data from browser
                     this.loadData();
 
                     const urlParams = new URLSearchParams(window.location.search);
@@ -346,18 +338,19 @@
                         window.history.replaceState({}, document.title, window.location.pathname);
                     }
 
-                    // Hide Loading
                     setTimeout(() => {
-                        document.getElementById('loading-overlay').style.display = 'none';
+                        const overlay = document.getElementById('loading-overlay');
+                        if (overlay) overlay.style.display = 'none';
                         if (!this.parentEmail) {
-                            document.getElementById('email-onboarding-modal').classList.remove('hidden');
+                            const onboarding = document.getElementById('email-onboarding-modal');
+                            if (onboarding) onboarding.classList.remove('hidden');
                         }
                     }, 800);
-
                 } catch (error) {
-                    console.error("Init Error:", error);
-                    this.showToast("Failed to load data.", "error");
-                    document.getElementById('loading-overlay').style.display = 'none';
+                    console.error('Init Error:', error);
+                    this.showToast('Failed to load data.', 'error');
+                    const overlay = document.getElementById('loading-overlay');
+                    if (overlay) overlay.style.display = 'none';
                 }
             },
 
@@ -366,15 +359,15 @@
                     const saved = localStorage.getItem('kaching_data');
                     if (saved) {
                         const data = JSON.parse(saved);
-                        this.points = data.points || 0;
-                        this.parentEmail = data.parentEmail || null;
-                        this.chores = data.chores || [];
-                        this.redeemedPrizes = data.redeemedPrizes || [];
+                        this.points = Number(data.points) || 0;
+                        this.parentEmail = normalizeEmail(data.parentEmail || null);
+                        this.chores = Array.isArray(data.chores) ? data.chores : [];
+                        this.redeemedPrizes = Array.isArray(data.redeemedPrizes) ? data.redeemedPrizes : [];
                     }
                 } catch (e) {
-                    console.warn("Local storage access blocked by browser, running in memory-only mode.");
+                    console.warn('Local storage access blocked by browser, running in memory-only mode.');
                 }
-                
+
                 const emailInput = document.getElementById('parent-email-input');
                 if (emailInput && this.parentEmail) {
                     emailInput.value = this.parentEmail;
@@ -392,29 +385,32 @@
                         redeemedPrizes: this.redeemedPrizes
                     }));
                 } catch (e) {
-                    console.warn("Local storage access blocked by browser, could not save data permanently.");
+                    console.warn('Local storage access blocked by browser, could not save data permanently.');
                 }
                 this.updateUI();
             },
 
             submitInitialParentEmail(event) {
                 if (event) event.preventDefault();
-                
-                const emailInput = document.getElementById('onboarding-email-input').value.trim();
-                if (!emailInput || !emailInput.includes('@')) {
-                    this.showToast("Please enter a valid email address.", "error");
+
+                const emailInput = document.getElementById('onboarding-email-input');
+                const parentEmail = normalizeEmail(emailInput ? emailInput.value : '');
+
+                if (!parentEmail || !parentEmail.includes('@')) {
+                    this.showToast('Please enter a valid email address.', 'error');
                     return;
                 }
-                
-                this.parentEmail = emailInput;
+
+                this.parentEmail = parentEmail;
                 this.saveData();
-                document.getElementById('email-onboarding-modal').classList.add('hidden');
-                
-                // Keep the Settings input updated just in case
+
+                const modal = document.getElementById('email-onboarding-modal');
+                if (modal) modal.classList.add('hidden');
+
                 const settingsEmailInput = document.getElementById('parent-email-input');
                 if (settingsEmailInput) settingsEmailInput.value = this.parentEmail;
-                
-                this.showToast("Awesome! You're all set.", "success");
+
+                this.showToast('Awesome! You\'re all set.', 'success');
             },
 
             updateUI() {
@@ -428,7 +424,9 @@
                 const els = ['home-points-display', 'chores-points-display', 'prizes-points-display'];
                 els.forEach(id => {
                     const el = document.getElementById(id);
-                    if(el) el.textContent = id.includes('chores') ? `${this.points} pts` : this.points;
+                    if (el) {
+                        el.textContent = id.includes('chores') ? `${this.points} pts` : this.points;
+                    }
                 });
             },
 
@@ -442,12 +440,12 @@
             async addChore(title = null, points = null) {
                 const inputTitle = document.getElementById('new-chore-title');
                 const inputPoints = document.getElementById('new-chore-points');
-                
-                const choreTitle = title || inputTitle.value.trim();
-                const chorePoints = points || parseInt(inputPoints.value);
+
+                const choreTitle = title || (inputTitle ? inputTitle.value.trim() : '');
+                const chorePoints = points ?? (inputPoints ? parseInt(inputPoints.value) : NaN);
 
                 if (!choreTitle || isNaN(chorePoints) || chorePoints <= 0) {
-                    this.showToast("Please enter a valid chore and points.", "error");
+                    this.showToast('Please enter a valid chore and points.', 'error');
                     return;
                 }
 
@@ -459,39 +457,48 @@
                     timestamp: Date.now()
                 };
 
-                this.chores.unshift(newChore); // Add to top
+                this.chores.unshift(newChore);
                 this.saveData();
 
-                if(!title) {
-                    inputTitle.value = '';
-                    inputPoints.value = '';
-                }
-                this.showToast(`Added chore: ${choreTitle}`, "success");
+                if (!title && inputTitle) inputTitle.value = '';
+                if (!title && inputPoints) inputPoints.value = '';
+
+                this.showToast(`Added chore: ${choreTitle}`, 'success');
             },
 
             async completeChore(choreId, choreTitle, chorePoints) {
+                if (!this.hasParentEmail()) {
+                    this.showToast('Add a parent email before sending a chore for approval.', 'info');
+                    return;
+                }
+
                 const choreIndex = this.chores.findIndex(c => c.id === choreId);
                 if (choreIndex > -1) {
                     this.chores[choreIndex].status = 'pending_approval';
                     this.saveData();
-                    this.showToast(`Approval requested for ${choreTitle}! You can now email your parent.`, "info");
+                    this.showToast(`Approval requested for ${choreTitle}! You can now email your parent.`, 'info');
                 }
             },
 
             copyApprovalLink(choreId, points) {
+                if (!this.hasParentEmail()) {
+                    this.showToast('Add a parent email before sending the approval link.', 'info');
+                    return;
+                }
+
                 const url = new URL(window.location.href);
                 url.searchParams.set('approve_chore', choreId);
                 url.searchParams.set('pts', points);
-                
+
                 const tempInput = document.createElement('input');
                 tempInput.value = url.toString();
                 document.body.appendChild(tempInput);
                 tempInput.select();
                 try {
                     document.execCommand('copy');
-                    this.showToast("Approval link copied! Send it to your parent.", "success");
+                    this.showToast('Approval link copied! Send it to your parent.', 'success');
                 } catch (err) {
-                    this.showToast("Failed to copy link.", "error");
+                    this.showToast('Failed to copy link.', 'error');
                 }
                 document.body.removeChild(tempInput);
             },
@@ -503,16 +510,16 @@
                 const chore = this.chores[choreIndex];
                 this.chores.splice(choreIndex, 1);
                 this.saveData();
-                this.showToast(`Deleted pending chore: ${chore.title}`, "info");
+                this.showToast(`Deleted pending chore: ${chore.title}`, 'info');
             },
 
             async handleParentApproval(choreId, points) {
                 const choreIndex = this.chores.findIndex(c => c.id === choreId);
                 if (choreIndex > -1) {
-                    this.chores.splice(choreIndex, 1); // Remove from list
-                    this.points += points; // Award the points
+                    this.chores.splice(choreIndex, 1);
+                    this.points += points;
                     this.saveData();
-                    this.showToast(`Chore approved! +${points} pts`, "success");
+                    this.showToast(`Chore approved! +${points} pts`, 'success');
                 }
             },
 
@@ -523,41 +530,46 @@
 
             async saveParentEmail(event) {
                 if (event) event.preventDefault();
-                
-                const emailInput = document.getElementById('parent-email-input').value.trim();
-                
-                if (!emailInput || !emailInput.includes('@')) {
-                    this.showToast("Please enter a valid email address.", "error");
+
+                const emailInput = document.getElementById('parent-email-input');
+                const emailValue = normalizeEmail(emailInput ? emailInput.value : '');
+
+                if (!emailValue || !emailValue.includes('@')) {
+                    this.showToast('Please enter a valid email address.', 'error');
                     return;
                 }
 
-                this.parentEmail = emailInput;
+                this.parentEmail = emailValue;
                 this.saveData();
-                this.showToast("Parent email saved!", "success");
+                this.showToast('Parent email saved!', 'success');
             },
-            
-            // New function to safely open the email draft without navigating away
+
             sendEmailDraft(choreId) {
+                if (!this.hasParentEmail()) {
+                    this.showToast('Add a parent email before sending the chore approval email.', 'info');
+                    return;
+                }
+
                 const chore = this.chores.find(c => c.id === choreId);
                 if (!chore) return;
-                
+
                 const url = new URL(window.location.href);
                 url.searchParams.set('approve_chore', chore.id);
                 url.searchParams.set('pts', chore.points);
                 const approvalLink = url.toString();
-                
+
                 const subject = encodeURIComponent(`Chore Finished: ${chore.title}`);
                 const body = encodeURIComponent(`Hi!\n\nI just finished my chore: ${chore.title}.\nCan you approve it so I get my ${chore.points} points?\n\nClick here to approve: ${approvalLink}`);
-                const mailtoLink = `mailto:${this.parentEmail || ''}?subject=${subject}&body=${body}`;
-                
-                // Opens in a new window/tab so the app doesn't reload
+                const mailtoLink = `mailto:${this.parentEmail}?subject=${subject}&body=${body}`;
+
                 window.open(mailtoLink, '_blank');
-                this.showToast("Opening email draft...", "info");
+                this.showToast('Opening email draft...', 'info');
             },
 
             renderChores() {
                 const container = document.getElementById('chore-list-container');
-                
+                if (!container) return;
+
                 if (this.chores.length === 0) {
                     container.innerHTML = '<div class="text-center text-gray-300 py-10" id="no-chores-msg">No chores yet! Add some or ask AI for suggestions.</div>';
                     return;
@@ -569,18 +581,20 @@
                     const isPending = chore.status === 'pending_approval';
                     const el = document.createElement('div');
                     el.className = `glass-panel p-4 rounded-xl mb-4 flex justify-between items-center animate-fade-in border-l-4 ${isPending ? 'border-orange-400 opacity-70' : 'border-yellow-400'} `;
-                    
+
+                    const safeTitle = escapeHtml(chore.title);
+                    const safePoints = escapeHtml(chore.points);
+
                     if (isPending) {
                         el.innerHTML = `
                             <div class="flex-1">
-                                <h4 class="text-lg font-semibold text-gray-200 line-through">${chore.title}</h4>
+                                <h4 class="text-lg font-semibold text-gray-200 line-through">${safeTitle}</h4>
                                 <div class="flex items-center gap-2 mt-1">
-                                    <p class="text-sm text-yellow-300/50 font-bold">${chore.points} pts</p>
+                                    <p class="text-sm text-yellow-300/50 font-bold">${safePoints} pts</p>
                                     <span class="text-[10px] uppercase font-bold tracking-wider bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded border border-orange-500/30">Pending</span>
                                 </div>
                             </div>
                             <div class="flex gap-2 ml-2 flex-wrap md:flex-nowrap justify-end mt-2 md:mt-0">
-                                <!-- Added a delete button so a pending chore can be removed if the parent does not approve it -->
                                 <button onclick="app.sendEmailDraft('${chore.id}')" class="glass-button bg-pink-500/30 hover:bg-pink-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center">
                                     <i class="fas fa-envelope mr-2"></i> Email Parent
                                 </button>
@@ -598,10 +612,10 @@
                     } else {
                         el.innerHTML = `
                             <div>
-                                <h4 class="text-lg font-semibold">${chore.title}</h4>
-                                <p class="text-sm text-yellow-300 font-bold">${chore.points} pts</p>
+                                <h4 class="text-lg font-semibold">${safeTitle}</h4>
+                                <p class="text-sm text-yellow-300 font-bold">${safePoints} pts</p>
                             </div>
-                            <button onclick="app.completeChore('${chore.id}', '${chore.title.replace(/'/g, "\\'")}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-xl flex items-center justify-center group">
+                            <button onclick="app.completeChore('${chore.id}', '${escapeHtml(chore.title).replace(/'/g, '\\' + "'")}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-xl flex items-center justify-center group shadow-lg">
                                 <i class="fas fa-check text-xl group-hover:scale-125 transition-transform"></i>
                             </button>
                         `;
@@ -612,19 +626,21 @@
 
             renderPrizes() {
                 const container = document.getElementById('available-prizes-container');
+                if (!container) return;
                 container.innerHTML = '';
-                
+
                 this.defaultPrizes.forEach(prize => {
                     const el = document.createElement('div');
-                    el.className = "glass-panel p-6 rounded-2xl flex flex-col items-center text-center transition-transform hover:-translate-y-2 group relative overflow-hidden";
-                    
+                    el.className = 'glass-panel p-6 rounded-2xl flex flex-col items-center text-center transition-transform hover:-translate-y-2 group relative overflow-hidden';
+
                     const canAfford = this.points >= prize.cost;
                     const btnClass = canAfford ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : 'glass-button opacity-50 cursor-not-allowed';
+                    const safeTitle = escapeHtml(prize.title);
 
                     el.innerHTML = `
                         <div class="absolute -right-4 -top-4 w-20 h-20 ${prize.color} rounded-full opacity-20 blur-xl group-hover:opacity-40 transition-opacity"></div>
                         <i class="fas ${prize.icon} text-4xl mb-4 text-white drop-shadow-lg"></i>
-                        <h4 class="text-lg font-bold mb-2 leading-tight">${prize.title}</h4>
+                        <h4 class="text-lg font-bold mb-2 leading-tight">${safeTitle}</h4>
                         <div class="mt-auto w-full pt-4">
                             <p class="text-yellow-300 font-bold mb-3">${prize.cost} pts</p>
                             <button ${!canAfford ? 'disabled' : ''} onclick="app.redeemPrize('${prize.id}')" class="w-full py-2 rounded-xl font-bold transition-all ${btnClass}">
@@ -641,7 +657,7 @@
                 if (!prize) return;
 
                 if (this.points < prize.cost) {
-                    this.showToast("Not enough points!", "error");
+                    this.showToast('Not enough points!', 'error');
                     return;
                 }
 
@@ -652,13 +668,15 @@
                     cost: prize.cost,
                     timestamp: Date.now()
                 });
-                
+
                 this.saveData();
-                this.showToast(`Redeemed ${prize.title}! 🎉`, "success");
+                this.showToast(`Redeemed ${prize.title}! 🎉`, 'success');
             },
 
             renderRedeemedPrizes() {
                 const container = document.getElementById('redeemed-prizes-container');
+                if (!container) return;
+
                 if (this.redeemedPrizes.length === 0) {
                     container.innerHTML = '<p class="text-gray-300 col-span-full">No prizes redeemed yet. Start doing chores!</p>';
                     return;
@@ -668,13 +686,13 @@
                 this.redeemedPrizes.forEach(prize => {
                     const date = new Date(prize.timestamp).toLocaleDateString();
                     const el = document.createElement('div');
-                    el.className = "glass-panel p-4 rounded-xl flex items-center gap-4 opacity-80";
+                    el.className = 'glass-panel p-4 rounded-xl flex items-center gap-4 opacity-80';
                     el.innerHTML = `
                         <div class="w-12 h-12 rounded-full glass flex items-center justify-center">
                             <i class="fas ${prize.icon} text-xl text-yellow-300"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-sm">${prize.title}</h4>
+                            <h4 class="font-bold text-sm">${escapeHtml(prize.title)}</h4>
                             <p class="text-xs text-gray-300">Redeemed: ${date}</p>
                         </div>
                     `;
@@ -684,27 +702,27 @@
 
             async suggestChores() {
                 const btn = document.getElementById('btn-suggest-chores');
+                if (!btn) return;
+
                 btn.innerHTML = '<div class="loader w-5 h-5 border-2"></div> <span>Generating...</span>';
                 btn.disabled = true;
 
                 try {
-                    // Simulating AI request for static deployment without backend API keys
                     await new Promise(r => setTimeout(r, 1500));
-                    
+
                     const backups = [
-                        {title: "Wipe Doorknobs Clean", points: 10},
-                        {title: "Hunt Dust Bunnies", points: 15},
-                        {title: "Organize Shoe Station", points: 20}
+                        { title: 'Wipe Doorknobs Clean', points: 10 },
+                        { title: 'Hunt Dust Bunnies', points: 15 },
+                        { title: 'Organize Shoe Station', points: 20 }
                     ];
 
                     for (const chore of backups) {
                         await this.addChore(chore.title, chore.points);
                     }
-                    this.showToast("Added 3 suggested chores!", "success");
-
+                    this.showToast('Added 3 suggested chores!', 'success');
                 } catch (error) {
-                    console.error("Error:", error);
-                    this.showToast("Failed to generate chores.", "error");
+                    console.error('Error:', error);
+                    this.showToast('Failed to generate chores.', 'error');
                 } finally {
                     btn.innerHTML = '<span>Suggest Fun Chores</span>';
                     btn.disabled = false;
@@ -713,18 +731,17 @@
 
             showToast(message, type = 'info') {
                 const container = document.getElementById('toast-container');
+                if (!container) return;
+
                 const toast = document.createElement('div');
                 const icon = type === 'success' ? 'fa-check-circle text-green-400' : (type === 'error' ? 'fa-exclamation-circle text-red-400' : 'fa-info-circle text-blue-400');
-                
-                toast.className = `glass-panel px-6 py-4 rounded-xl flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300 shadow-xl border-t border-l border-white/10`;
-                toast.innerHTML = `<i class="fas ${icon} text-xl"></i> <span class="font-semibold">${message}</span>`;
-                
-                container.appendChild(toast);
-                
-                setTimeout(() => {
-                    toast.classList.remove('translate-y-10', 'opacity-0');
-                }, 10);
 
+                toast.className = `glass-panel px-6 py-4 rounded-xl flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300 shadow-xl border-t border-l border-white/20`;
+                toast.innerHTML = `<i class="fas ${icon} text-xl"></i> <span class="font-semibold">${escapeHtml(message)}</span>`;
+
+                container.appendChild(toast);
+
+                setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
                 setTimeout(() => {
                     toast.classList.add('opacity-0', 'translate-x-10');
                     setTimeout(() => toast.remove(), 300);
@@ -733,9 +750,8 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            app.init();
+            window.app.init();
         });
-
     </script>
 </body>
 </html>
