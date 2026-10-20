@@ -692,9 +692,6 @@
                                 <button onclick="app.deletePendingChore('${chore.id}')" class="glass-button bg-red-500/30 hover:bg-red-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center">
                                     <i class="fas fa-trash mr-2"></i> Delete
                                 </button>
-                                <button onclick="app.approveChore('${chore.id}', ${chore.points})" class="glass-button bg-blue-500/30 hover:bg-blue-500/60 text-white p-2 px-3 rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-check-double"></i> Approve
-                                </button>
                             </div>
                         `;
                     } else {
@@ -825,7 +822,7 @@
                 const toast = document.createElement('div');
                 const icon = type === 'success' ? 'fa-check-circle text-green-400' : (type === 'error' ? 'fa-exclamation-circle text-red-400' : 'fa-info-circle text-blue-400');
 
-                toast.className = `glass-panel px-6 py-4 rounded-xl flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300 shadow-xl border-t border-l border-white/20`;
+                toast.className = `glass-panel px-6 py-4 rounded-xl flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300 shadow-xl border-t border-l border-white/10`;
                 toast.innerHTML = `<i class="fas ${icon} text-xl"></i> <span class="font-semibold">${escapeHtml(message)}</span>`;
 
                 container.appendChild(toast);
