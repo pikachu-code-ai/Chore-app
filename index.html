@@ -272,6 +272,9 @@
                         <i class="fas fa-shield-alt text-blue-400"></i> Parental Controls
                     </h3>
                     <p class="text-sm text-gray-200 mb-4">Set a parent's email address to receive chore approval requests when chores are finished.</p>
+                    <div class="mb-4 rounded-xl border border-yellow-400/40 bg-yellow-400/10 px-3 py-2 text-xs text-yellow-100">
+                        <strong>Important:</strong> chores need a saved parent email before they can be submitted for approval.
+                    </div>
 
                     <form onsubmit="app.saveParentEmail(event); return false;" class="flex flex-col gap-3">
                         <input type="email" id="parent-email-input" placeholder="parent@email.com" class="w-full px-4 py-3 rounded-xl glass-input" />
@@ -323,6 +326,21 @@
 
             hasParentEmail() {
                 return !!this.parentEmail && this.parentEmail.includes('@');
+            },
+
+            requireParentEmail() {
+                if (!this.hasParentEmail()) {
+                    const settingsSection = document.getElementById('view-etc');
+                    if (settingsSection) settingsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const parentInput = document.getElementById('parent-email-input');
+                    if (parentInput) {
+                        parentInput.focus();
+                        parentInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    this.showToast('Save a parent email before submitting a chore for approval.', 'info');
+                    return false;
+                }
+                return true;
             },
 
             async init() {
@@ -467,24 +485,21 @@
             },
 
             async completeChore(choreId, choreTitle, chorePoints) {
-                if (!this.hasParentEmail()) {
-                    this.showToast('Add a parent email before sending a chore for approval.', 'info');
-                    return;
-                }
+                if (!this.requireParentEmail()) return;
+
+                const confirmed = window.confirm(`Submit "${choreTitle}" for approval and send your parent a request for ${chorePoints} points?`);
+                if (!confirmed) return;
 
                 const choreIndex = this.chores.findIndex(c => c.id === choreId);
                 if (choreIndex > -1) {
                     this.chores[choreIndex].status = 'pending_approval';
                     this.saveData();
-                    this.showToast(`Approval requested for ${choreTitle}! You can now email your parent.`, 'info');
+                    this.showToast(`Submitted for approval: ${choreTitle}. Parent review is now waiting.`, 'info');
                 }
             },
 
             copyApprovalLink(choreId, points) {
-                if (!this.hasParentEmail()) {
-                    this.showToast('Add a parent email before sending the approval link.', 'info');
-                    return;
-                }
+                if (!this.requireParentEmail()) return;
 
                 const url = new URL(window.location.href);
                 url.searchParams.set('approve_chore', choreId);
@@ -524,6 +539,8 @@
             },
 
             async approveChore(choreId, points) {
+                const confirmed = window.confirm('Approve this chore and award the points now?');
+                if (!confirmed) return;
                 await this.handleParentApproval(choreId, points);
                 this.updateUI();
             },
@@ -545,10 +562,7 @@
             },
 
             sendEmailDraft(choreId) {
-                if (!this.hasParentEmail()) {
-                    this.showToast('Add a parent email before sending the chore approval email.', 'info');
-                    return;
-                }
+                if (!this.requireParentEmail()) return;
 
                 const chore = this.chores.find(c => c.id === choreId);
                 if (!chore) return;
@@ -591,12 +605,12 @@
                                 <h4 class="text-lg font-semibold text-gray-200 line-through">${safeTitle}</h4>
                                 <div class="flex items-center gap-2 mt-1">
                                     <p class="text-sm text-yellow-300/50 font-bold">${safePoints} pts</p>
-                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded border border-orange-500/30">Pending</span>
+                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded border border-orange-500/30">Pending Review</span>
                                 </div>
                             </div>
                             <div class="flex gap-2 ml-2 flex-wrap md:flex-nowrap justify-end mt-2 md:mt-0">
                                 <button onclick="app.sendEmailDraft('${chore.id}')" class="glass-button bg-pink-500/30 hover:bg-pink-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-envelope mr-2"></i> Email Parent
+                                    <i class="fas fa-envelope mr-2"></i> Send Reminder
                                 </button>
                                 <button onclick="app.copyApprovalLink('${chore.id}', ${chore.points})" class="glass-button bg-purple-500/30 hover:bg-purple-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center">
                                     <i class="fas fa-link mr-2"></i> Copy Link
@@ -615,7 +629,8 @@
                                 <h4 class="text-lg font-semibold">${safeTitle}</h4>
                                 <p class="text-sm text-yellow-300 font-bold">${safePoints} pts</p>
                             </div>
-                            <button onclick="app.completeChore('${chore.id}', '${escapeHtml(chore.title).replace(/'/g, '\\' + "'")}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-xl flex items-center justify-center group shadow-lg">
+                            <button onclick="app.completeChore('${chore.id}', '${escapeHtml(chore.title).replace(/'/g, '\\' + "'")}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-xl flex items-center justify-center group shadow-lg" title="Submit for parent approval">
+                                <span class="mr-2 text-sm font-bold">Submit</span>
                                 <i class="fas fa-check text-xl group-hover:scale-125 transition-transform"></i>
                             </button>
                         `;
