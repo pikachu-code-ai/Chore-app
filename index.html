@@ -309,6 +309,65 @@
             return String(value || '').trim().toLowerCase();
         }
 
+        function clampNumber(value, min, max) {
+            const num = Number(value);
+            if (!Number.isFinite(num)) return min;
+            return Math.max(min, Math.min(max, num));
+        }
+
+        function sanitizeText(value, maxLength = 80) {
+            if (value === null || value === undefined) return '';
+            return String(value).replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, maxLength);
+        }
+
+        function sanitizeStoredData(raw) {
+            const defaults = {
+                points: 0,
+                parentEmail: null,
+                chores: [],
+                redeemedPrizes: []
+            };
+
+            if (!raw || typeof raw !== 'object') {
+                return defaults;
+            }
+
+            const chores = Array.isArray(raw.chores) ? raw.chores : [];
+            const redeemedPrizes = Array.isArray(raw.redeemedPrizes) ? raw.redeemedPrizes : [];
+
+            return {
+                points: clampNumber(raw.points, 0, 100000),
+                parentEmail: normalizeEmail(raw.parentEmail || null),
+                chores: chores
+                    .filter(item => item && typeof item === 'object')
+                    .map(item => ({
+                        id: sanitizeText(item.id, 50) || `chore_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                        title: sanitizeText(item.title, 120),
+                        points: clampNumber(item.points, 0, 5000),
+                        status: item.status === 'pending_approval' ? 'pending_approval' : 'active',
+                        timestamp: Number(item.timestamp) || Date.now()
+                    }))
+                    .filter(item => item.title.length > 0),
+                redeemedPrizes: redeemedPrizes
+                    .filter(item => item && typeof item === 'object')
+                    .map(item => ({
+                        title: sanitizeText(item.title, 120),
+                        icon: sanitizeText(item.icon, 50),
+                        cost: clampNumber(item.cost, 0, 100000),
+                        timestamp: Number(item.timestamp) || Date.now()
+                    }))
+                    .filter(item => item.title.length > 0)
+            };
+        }
+
+        function makeSafeJsString(value) {
+            return String(value ?? '')
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/\r/g, '')
+                .replace(/\n/g, ' ');
+        }
+
         window.app = {
             points: 0,
             parentEmail: null,
@@ -376,14 +435,19 @@
                 try {
                     const saved = localStorage.getItem('kaching_data');
                     if (saved) {
-                        const data = JSON.parse(saved);
-                        this.points = Number(data.points) || 0;
-                        this.parentEmail = normalizeEmail(data.parentEmail || null);
-                        this.chores = Array.isArray(data.chores) ? data.chores : [];
-                        this.redeemedPrizes = Array.isArray(data.redeemedPrizes) ? data.redeemedPrizes : [];
+                        const parsed = JSON.parse(saved);
+                        const data = sanitizeStoredData(parsed);
+                        this.points = data.points;
+                        this.parentEmail = data.parentEmail || null;
+                        this.chores = data.chores;
+                        this.redeemedPrizes = data.redeemedPrizes;
                     }
                 } catch (e) {
-                    console.warn('Local storage access blocked by browser, running in memory-only mode.');
+                    console.warn('Local storage access blocked by browser or data was malformed; resetting to safe defaults.');
+                    this.points = 0;
+                    this.parentEmail = null;
+                    this.chores = [];
+                    this.redeemedPrizes = [];
                 }
 
                 const emailInput = document.getElementById('parent-email-input');
@@ -396,11 +460,18 @@
 
             saveData() {
                 try {
-                    localStorage.setItem('kaching_data', JSON.stringify({
+                    const safeData = sanitizeStoredData({
                         points: this.points,
                         parentEmail: this.parentEmail,
                         chores: this.chores,
                         redeemedPrizes: this.redeemedPrizes
+                    });
+
+                    localStorage.setItem('kaching_data', JSON.stringify({
+                        points: safeData.points,
+                        parentEmail: safeData.parentEmail,
+                        chores: safeData.chores,
+                        redeemedPrizes: safeData.redeemedPrizes
                     }));
                 } catch (e) {
                     console.warn('Local storage access blocked by browser, could not save data permanently.');
@@ -459,10 +530,10 @@
                 const inputTitle = document.getElementById('new-chore-title');
                 const inputPoints = document.getElementById('new-chore-points');
 
-                const choreTitle = title || (inputTitle ? inputTitle.value.trim() : '');
-                const chorePoints = points ?? (inputPoints ? parseInt(inputPoints.value) : NaN);
+                const choreTitle = sanitizeText(title || (inputTitle ? inputTitle.value : ''), 120);
+                const chorePoints = clampNumber(points ?? (inputPoints ? parseInt(inputPoints.value) : NaN), 0, 5000);
 
-                if (!choreTitle || isNaN(chorePoints) || chorePoints <= 0) {
+                if (!choreTitle || chorePoints <= 0) {
                     this.showToast('Please enter a valid chore and points.', 'error');
                     return;
                 }
@@ -529,12 +600,15 @@
             },
 
             async handleParentApproval(choreId, points) {
+                const safePoints = clampNumber(points, 0, 100000);
+                if (!choreId || safePoints <= 0) return;
+
                 const choreIndex = this.chores.findIndex(c => c.id === choreId);
                 if (choreIndex > -1) {
                     this.chores.splice(choreIndex, 1);
-                    this.points += points;
+                    this.points += safePoints;
                     this.saveData();
-                    this.showToast(`Chore approved! +${points} pts`, 'success');
+                    this.showToast(`Chore approved! +${safePoints} pts`, 'success');
                 }
             },
 
@@ -629,7 +703,7 @@
                                 <h4 class="text-lg font-semibold">${safeTitle}</h4>
                                 <p class="text-sm text-yellow-300 font-bold">${safePoints} pts</p>
                             </div>
-                            <button onclick="app.completeChore('${chore.id}', '${escapeHtml(chore.title).replace(/'/g, '\\' + "'")}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-xl flex items-center justify-center group shadow-lg" title="Submit for parent approval">
+                            <button onclick="app.completeChore('${makeSafeJsString(chore.id)}', '${makeSafeJsString(chore.title)}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-xl flex items-center justify-center group shadow-lg" title="Submit for parent approval">
                                 <span class="mr-2 text-sm font-bold">Submit</span>
                                 <i class="fas fa-check text-xl group-hover:scale-125 transition-transform"></i>
                             </button>
