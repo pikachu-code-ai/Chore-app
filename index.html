@@ -254,6 +254,15 @@
                 </div>
             </div>
 
+            <div class="glass-panel p-6 rounded-2xl mb-8">
+                <h3 class="text-2xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-plus-circle text-green-300"></i> Add a Prize</h3>
+                <div class="grid grid-cols-1 md:grid-cols-[1.5fr_0.8fr_auto] gap-4">
+                    <input type="text" id="new-prize-title" placeholder="Prize Name (e.g. Pizza Night)" class="w-full px-4 py-3 rounded-xl glass-input" />
+                    <input type="number" id="new-prize-cost" placeholder="Cost" class="w-full px-4 py-3 rounded-xl glass-input" />
+                    <button type="button" onclick="app.addPrize()" class="glass-button bg-green-500/30 hover:bg-green-500/50 rounded-xl px-5 py-3 font-bold">Add Prize</button>
+                </div>
+            </div>
+
             <div class="flex-1 overflow-y-auto pr-2 pb-10">
                 <h3 class="text-2xl font-semibold mb-4 border-b border-white/20 pb-2">Available Prizes</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12" id="available-prizes-container"></div>
@@ -325,7 +334,8 @@
                 points: 0,
                 parentEmail: null,
                 chores: [],
-                redeemedPrizes: []
+                redeemedPrizes: [],
+                customPrizes: []
             };
 
             if (!raw || typeof raw !== 'object') {
@@ -334,6 +344,7 @@
 
             const chores = Array.isArray(raw.chores) ? raw.chores : [];
             const redeemedPrizes = Array.isArray(raw.redeemedPrizes) ? raw.redeemedPrizes : [];
+            const customPrizes = Array.isArray(raw.customPrizes) ? raw.customPrizes : [];
 
             return {
                 points: clampNumber(raw.points, 0, 100000),
@@ -356,6 +367,16 @@
                         cost: clampNumber(item.cost, 0, 100000),
                         timestamp: Number(item.timestamp) || Date.now()
                     }))
+                    .filter(item => item.title.length > 0),
+                customPrizes: customPrizes
+                    .filter(item => item && typeof item === 'object')
+                    .map(item => ({
+                        id: sanitizeText(item.id, 50) || `custom_prize_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                        title: sanitizeText(item.title, 120),
+                        cost: clampNumber(item.cost, 0, 100000),
+                        icon: sanitizeText(item.icon, 50) || 'fa-gift',
+                        color: sanitizeText(item.color, 50) || 'bg-emerald-500'
+                    }))
                     .filter(item => item.title.length > 0)
             };
         }
@@ -373,6 +394,7 @@
             parentEmail: null,
             chores: [],
             redeemedPrizes: [],
+            customPrizes: [],
 
             defaultPrizes: [
                 { id: 'p1', title: 'Extra Screen Time (30m)', cost: 50, icon: 'fa-gamepad', color: 'bg-blue-500' },
@@ -441,6 +463,7 @@
                         this.parentEmail = data.parentEmail || null;
                         this.chores = data.chores;
                         this.redeemedPrizes = data.redeemedPrizes;
+                        this.customPrizes = data.customPrizes;
                     }
                 } catch (e) {
                     console.warn('Local storage access blocked by browser or data was malformed; resetting to safe defaults.');
@@ -448,6 +471,7 @@
                     this.parentEmail = null;
                     this.chores = [];
                     this.redeemedPrizes = [];
+                    this.customPrizes = [];
                 }
 
                 const emailInput = document.getElementById('parent-email-input');
@@ -464,14 +488,16 @@
                         points: this.points,
                         parentEmail: this.parentEmail,
                         chores: this.chores,
-                        redeemedPrizes: this.redeemedPrizes
+                        redeemedPrizes: this.redeemedPrizes,
+                        customPrizes: this.customPrizes
                     });
 
                     localStorage.setItem('kaching_data', JSON.stringify({
                         points: safeData.points,
                         parentEmail: safeData.parentEmail,
                         chores: safeData.chores,
-                        redeemedPrizes: safeData.redeemedPrizes
+                        redeemedPrizes: safeData.redeemedPrizes,
+                        customPrizes: safeData.customPrizes
                     }));
                 } catch (e) {
                     console.warn('Local storage access blocked by browser, could not save data permanently.');
@@ -553,6 +579,35 @@
                 if (!title && inputPoints) inputPoints.value = '';
 
                 this.showToast(`Added chore: ${choreTitle}`, 'success');
+            },
+
+            async addPrize(title = null, cost = null) {
+                const inputTitle = document.getElementById('new-prize-title');
+                const inputCost = document.getElementById('new-prize-cost');
+
+                const prizeTitle = sanitizeText(title || (inputTitle ? inputTitle.value : ''), 120);
+                const prizeCost = clampNumber(cost ?? (inputCost ? parseInt(inputCost.value) : NaN), 0, 100000);
+
+                if (!prizeTitle || prizeCost <= 0) {
+                    this.showToast('Please enter a valid prize name and cost.', 'error');
+                    return;
+                }
+
+                const newPrize = {
+                    id: 'custom_prize_' + Date.now(),
+                    title: prizeTitle,
+                    cost: prizeCost,
+                    icon: 'fa-gift',
+                    color: 'bg-emerald-500'
+                };
+
+                this.customPrizes.unshift(newPrize);
+                this.saveData();
+
+                if (!title && inputTitle) inputTitle.value = '';
+                if (!title && inputCost) inputCost.value = '';
+
+                this.showToast(`Added prize: ${prizeTitle}`, 'success');
             },
 
             async completeChore(choreId, choreTitle, chorePoints) {
@@ -715,17 +770,21 @@
                 if (!container) return;
                 container.innerHTML = '';
 
-                this.defaultPrizes.forEach(prize => {
+                const allPrizes = [...this.defaultPrizes, ...this.customPrizes];
+
+                allPrizes.forEach(prize => {
                     const el = document.createElement('div');
                     el.className = 'glass-panel p-6 rounded-2xl flex flex-col items-center text-center transition-transform hover:-translate-y-2 group relative overflow-hidden';
 
+                    const prizeIcon = prize.icon || 'fa-gift';
+                    const prizeColor = prize.color || 'bg-emerald-500';
                     const canAfford = this.points >= prize.cost;
                     const btnClass = canAfford ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : 'glass-button opacity-50 cursor-not-allowed';
                     const safeTitle = escapeHtml(prize.title);
 
                     el.innerHTML = `
-                        <div class="absolute -right-4 -top-4 w-20 h-20 ${prize.color} rounded-full opacity-20 blur-xl group-hover:opacity-40 transition-opacity"></div>
-                        <i class="fas ${prize.icon} text-4xl mb-4 text-white drop-shadow-lg"></i>
+                        <div class="absolute -right-4 -top-4 w-20 h-20 ${prizeColor} rounded-full opacity-20 blur-xl group-hover:opacity-40 transition-opacity"></div>
+                        <i class="fas ${prizeIcon} text-4xl mb-4 text-white drop-shadow-lg"></i>
                         <h4 class="text-lg font-bold mb-2 leading-tight">${safeTitle}</h4>
                         <div class="mt-auto w-full pt-4">
                             <p class="text-yellow-300 font-bold mb-3">${prize.cost} pts</p>
@@ -739,7 +798,8 @@
             },
 
             async redeemPrize(prizeId) {
-                const prize = this.defaultPrizes.find(p => p.id === prizeId);
+                const allPrizes = [...this.defaultPrizes, ...this.customPrizes];
+                const prize = allPrizes.find(p => p.id === prizeId);
                 if (!prize) return;
 
                 if (this.points < prize.cost) {
@@ -750,7 +810,7 @@
                 this.points -= prize.cost;
                 this.redeemedPrizes.unshift({
                     title: prize.title,
-                    icon: prize.icon,
+                    icon: prize.icon || 'fa-gift',
                     cost: prize.cost,
                     timestamp: Date.now()
                 });
