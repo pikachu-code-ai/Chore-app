@@ -633,26 +633,6 @@
                 }
             },
 
-            copyApprovalLink(choreId, points) {
-                if (!this.requireParentEmail()) return;
-
-                const url = new URL(window.location.href);
-                url.searchParams.set('approve_chore', choreId);
-                url.searchParams.set('pts', points);
-
-                const tempInput = document.createElement('input');
-                tempInput.value = url.toString();
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                try {
-                    document.execCommand('copy');
-                    this.showToast('Approval link copied! Send it to your parent.', 'success');
-                } catch (err) {
-                    this.showToast('Failed to copy link.', 'error');
-                }
-                document.body.removeChild(tempInput);
-            },
-
             deletePendingChore(choreId) {
                 const choreIndex = this.chores.findIndex(c => c.id === choreId);
                 if (choreIndex === -1) return;
@@ -749,9 +729,6 @@
                             <div class="flex gap-2 ml-2 flex-wrap md:flex-nowrap justify-end mt-2 md:mt-0">
                                 <button onclick="app.sendEmailDraft('${chore.id}')" class="glass-button bg-pink-500/30 hover:bg-pink-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center">
                                     <i class="fas fa-envelope mr-2"></i> Send Reminder
-                                </button>
-                                <button onclick="app.copyApprovalLink('${chore.id}', ${chore.points})" class="glass-button bg-purple-500/30 hover:bg-purple-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-link mr-2"></i> Copy Link
                                 </button>
                                 <button onclick="app.deletePendingChore('${chore.id}')" class="glass-button bg-red-500/30 hover:bg-red-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center">
                                     <i class="fas fa-trash mr-2"></i> Delete
