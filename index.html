@@ -240,6 +240,15 @@
                         <button type="button" onclick="app.suggestChores()" id="btn-suggest-chores" class="w-full glass-button bg-white/20 hover:bg-white/30 rounded-xl py-3 font-bold flex justify-center items-center gap-2">
                             <span>Suggest Fun Chores</span>
                         </button>
+
+                        <div id="ai-suggestions-preview" class="hidden mt-4">
+                            <p class="text-xs uppercase tracking-wider text-gray-300 mb-2">Ready to add</p>
+                            <ul id="ai-suggestions-list" class="space-y-2 mb-4 text-sm text-gray-100"></ul>
+                            <div class="flex gap-2">
+                                <button type="button" onclick="app.confirmSuggestedChores()" class="flex-1 glass-button bg-green-500/30 hover:bg-green-500/50 rounded-xl py-2 font-bold">Confirm</button>
+                                <button type="button" onclick="app.cancelSuggestedChores()" class="flex-1 glass-button bg-red-500/30 hover:bg-red-500/50 rounded-xl py-2 font-bold">Cancel</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -395,6 +404,7 @@
             chores: [],
             redeemedPrizes: [],
             customPrizes: [],
+            pendingSuggestions: [],
 
             defaultPrizes: [
                 { id: 'p1', title: 'Extra Screen Time (30m)', cost: 50, icon: 'fa-gamepad', color: 'bg-blue-500' },
@@ -435,6 +445,79 @@
                     [pool[i], pool[j]] = [pool[j], pool[i]];
                 }
                 return pool.slice(0, Math.min(count, pool.length));
+            },
+
+            renderSuggestionPreview(suggestions = []) {
+                const preview = document.getElementById('ai-suggestions-preview');
+                const list = document.getElementById('ai-suggestions-list');
+                if (!preview || !list) return;
+
+                if (!suggestions.length) {
+                    preview.classList.add('hidden');
+                    list.innerHTML = '';
+                    return;
+                }
+
+                list.innerHTML = suggestions.map(item => `
+                    <li class="flex items-center justify-between gap-3 rounded-lg bg-white/10 px-3 py-2">
+                        <span class="truncate">${escapeHtml(item.title)}</span>
+                        <span class="font-bold text-yellow-300">${item.points} pts</span>
+                    </li>
+                `).join('');
+                preview.classList.remove('hidden');
+            },
+
+            cancelSuggestedChores() {
+                this.pendingSuggestions = [];
+                this.renderSuggestionPreview([]);
+                const btn = document.getElementById('btn-suggest-chores');
+                if (btn) {
+                    btn.innerHTML = '<span>Suggest Fun Chores</span>';
+                    btn.disabled = false;
+                }
+            },
+
+            confirmSuggestedChores() {
+                if (!this.pendingSuggestions.length) {
+                    this.showToast('No suggestions to add yet.', 'info');
+                    return;
+                }
+
+                const suggestions = [...this.pendingSuggestions];
+                const validSuggestions = suggestions.filter(suggestion => {
+                    const title = sanitizeText(suggestion.title, 120);
+                    const points = clampNumber(suggestion.points, 0, 5000);
+                    return !!title && points > 0;
+                });
+
+                if (!validSuggestions.length) {
+                    this.pendingSuggestions = [];
+                    this.renderSuggestionPreview([]);
+                    this.showToast('No valid suggestions found.', 'error');
+                    return;
+                }
+
+                validSuggestions.forEach(suggestion => {
+                    this.chores.unshift({
+                        id: 'chore_' + Date.now() + '_' + Math.random().toString(16).slice(2),
+                        title: sanitizeText(suggestion.title, 120),
+                        points: clampNumber(suggestion.points, 0, 5000),
+                        status: 'active',
+                        timestamp: Date.now()
+                    });
+                });
+
+                this.pendingSuggestions = [];
+                this.renderSuggestionPreview([]);
+                this.saveData();
+
+                const btn = document.getElementById('btn-suggest-chores');
+                if (btn) {
+                    btn.innerHTML = '<span>Suggest Fun Chores</span>';
+                    btn.disabled = false;
+                }
+
+                this.showToast(`Added ${validSuggestions.length} fresh suggestions!`, 'success');
             },
 
             hasParentEmail() {
@@ -876,11 +959,9 @@
                 try {
                     await new Promise(r => setTimeout(r, 1200));
                     const suggestions = this.getRandomizedSuggestions(3);
-
-                    for (const chore of suggestions) {
-                        await this.addChore(chore.title, chore.points);
-                    }
-                    this.showToast(`Added ${suggestions.length} fresh suggestions!`, 'success');
+                    this.pendingSuggestions = suggestions;
+                    this.renderSuggestionPreview(suggestions);
+                    this.showToast('Review the suggestions and confirm to add them.', 'info');
                 } catch (error) {
                     console.error('Error:', error);
                     this.showToast('Failed to generate chores.', 'error');
