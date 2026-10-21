@@ -80,6 +80,58 @@
             border-color: rgba(255, 255, 255, 0.6);
         }
 
+        .field-shell {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 0.9rem;
+            padding: 0.45rem 0.8rem 0.4rem;
+            min-height: 68px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.2rem;
+        }
+
+        .field-shell label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.62rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding-left: 0.12rem;
+        }
+
+        .field-shell input,
+        .field-shell select {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            font-size: 1rem;
+            width: 100%;
+            min-height: 32px;
+            padding: 0;
+            appearance: none;
+            -moz-appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .field-shell select option {
+            color: #1f2937;
+        }
+
+        .field-shell input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.9;
+            cursor: pointer;
+        }
+
+        .chore-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.75rem;
+        }
+
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -124,6 +176,12 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .chore-form-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -227,20 +285,29 @@
                         <h3 class="text-xl font-bold mb-4">Add a Chore</h3>
                         <input type="text" id="new-chore-title" placeholder="Chore Name (e.g. Clean Room)" class="w-full px-4 py-3 rounded-xl glass-input mb-4" />
 
-                        <div class="grid grid-cols-1 gap-3 mb-4">
-                            <select id="new-chore-category" class="w-full px-4 py-3 rounded-xl glass-input">
-                                <option value="General">General</option>
-                                <option value="Cleaning">Cleaning</option>
-                                <option value="Kitchen">Kitchen</option>
-                                <option value="Outside">Outside</option>
-                                <option value="Laundry">Laundry</option>
-                                <option value="Bathroom">Bathroom</option>
-                                <option value="Bedroom">Bedroom</option>
-                                <option value="Pets">Pets</option>
-                            </select>
-                            <div class="grid grid-cols-2 gap-3">
-                                <input type="date" id="new-chore-due-date" class="w-full px-4 py-3 rounded-xl glass-input" />
-                                <select id="new-chore-repeat" class="w-full px-4 py-3 rounded-xl glass-input">
+                        <div class="chore-form-grid mb-4">
+                            <div class="field-shell">
+                                <label>Category</label>
+                                <select id="new-chore-category" class="glass-input">
+                                    <option value="General">General</option>
+                                    <option value="Cleaning">Cleaning</option>
+                                    <option value="Kitchen">Kitchen</option>
+                                    <option value="Outside">Outside</option>
+                                    <option value="Laundry">Laundry</option>
+                                    <option value="Bathroom">Bathroom</option>
+                                    <option value="Bedroom">Bedroom</option>
+                                    <option value="Pets">Pets</option>
+                                </select>
+                            </div>
+
+                            <div class="field-shell">
+                                <label>Due</label>
+                                <input type="date" id="new-chore-due-date" class="glass-input" />
+                            </div>
+
+                            <div class="field-shell">
+                                <label>Repeat</label>
+                                <select id="new-chore-repeat" class="glass-input">
                                     <option value="none">One time</option>
                                     <option value="daily">Daily</option>
                                     <option value="weekly">Weekly</option>
