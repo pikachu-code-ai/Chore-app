@@ -226,6 +226,29 @@
                     <div class="glass-panel rounded-2xl p-6">
                         <h3 class="text-xl font-bold mb-4">Add a Chore</h3>
                         <input type="text" id="new-chore-title" placeholder="Chore Name (e.g. Clean Room)" class="w-full px-4 py-3 rounded-xl glass-input mb-4" />
+
+                        <div class="grid grid-cols-1 gap-3 mb-4">
+                            <select id="new-chore-category" class="w-full px-4 py-3 rounded-xl glass-input">
+                                <option value="General">General</option>
+                                <option value="Cleaning">Cleaning</option>
+                                <option value="Kitchen">Kitchen</option>
+                                <option value="Outside">Outside</option>
+                                <option value="Laundry">Laundry</option>
+                                <option value="Bathroom">Bathroom</option>
+                                <option value="Bedroom">Bedroom</option>
+                                <option value="Pets">Pets</option>
+                            </select>
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="date" id="new-chore-due-date" class="w-full px-4 py-3 rounded-xl glass-input" />
+                                <select id="new-chore-repeat" class="w-full px-4 py-3 rounded-xl glass-input">
+                                    <option value="none">One time</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="flex gap-4 mb-4">
                             <input type="number" id="new-chore-points" placeholder="Points" class="w-1/2 px-4 py-3 rounded-xl glass-input" />
                             <button type="button" onclick="app.addChore()" class="w-1/2 glass-button bg-green-500/30 hover:bg-green-500/50 rounded-xl font-bold">Add</button>
@@ -302,6 +325,17 @@
                     </form>
                 </div>
 
+                <div class="glass-panel p-6 rounded-2xl mb-6">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-line text-pink-400"></i> Chore Tracking
+                    </h3>
+                    <div class="space-y-3 text-sm text-gray-100">
+                        <div class="flex justify-between items-center"><span>Due soon</span><strong id="stats-due-soon">0</strong></div>
+                        <div class="flex justify-between items-center"><span>Recurring chores</span><strong id="stats-recurring">0</strong></div>
+                        <div class="flex justify-between items-center"><span>Best streak</span><strong id="stats-best-streak">0 days</strong></div>
+                    </div>
+                </div>
+
                 <div class="glass-panel p-6 rounded-2xl text-center">
                     <h3 class="text-xl font-bold mb-2">App Info</h3>
                     <p class="text-sm text-gray-300 mb-1">Version: 1.2 (Improved UX)</p>
@@ -323,6 +357,13 @@
                 .replace(/'/g, '&#039;');
         }
 
+        function getDateString(value) {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toISOString().split('T')[0];
+        }
+
         function normalizeEmail(value) {
             return String(value || '').trim().toLowerCase();
         }
@@ -336,6 +377,76 @@
         function sanitizeText(value, maxLength = 80) {
             if (value === null || value === undefined) return '';
             return String(value).replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, maxLength);
+        }
+
+        function normalizeCategory(value) {
+            const allowedCategories = ['General', 'Cleaning', 'Kitchen', 'Outside', 'Laundry', 'Bathroom', 'Bedroom', 'Pets'];
+            const candidate = sanitizeText(value || '', 30);
+            return allowedCategories.includes(candidate) ? candidate : 'General';
+        }
+
+        function normalizeRepeat(value) {
+            const candidate = sanitizeText(value || '', 20).toLowerCase();
+            return ['daily', 'weekly', 'monthly'].includes(candidate) ? candidate : 'none';
+        }
+
+        function formatDisplayDate(dateString) {
+            if (!dateString) return 'No due date';
+            const date = new Date(dateString + 'T12:00:00');
+            if (Number.isNaN(date.getTime())) return 'No due date';
+            return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+
+        function formatDueDateLabel(dateString) {
+            if (!dateString) return 'No due date';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dueDate = new Date(dateString + 'T12:00:00');
+            dueDate.setHours(0, 0, 0, 0);
+            const diffDays = Math.round((dueDate - today) / 86400000);
+
+            if (diffDays === 0) return 'Due today';
+            if (diffDays === 1) return 'Due tomorrow';
+            if (diffDays < 0) return `${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? '' : 's'} overdue`;
+            return `Due in ${diffDays} days`;
+        }
+
+        function getNextDueDate(dateString, repeatValue) {
+            const repeat = normalizeRepeat(repeatValue);
+            if (repeat === 'none') return '';
+
+            const baseDate = dateString ? new Date(dateString + 'T12:00:00') : new Date();
+            const amount = repeat === 'daily' ? 1 : repeat === 'weekly' ? 7 : 30;
+            baseDate.setDate(baseDate.getDate() + amount);
+            return getDateString(baseDate);
+        }
+
+        function calculateChoreStreak(historyDates) {
+            const uniqueDates = [...new Set((Array.isArray(historyDates) ? historyDates : [])
+                .map(date => sanitizeText(date, 12))
+                .filter(Boolean))]
+                .sort((a, b) => new Date(b) - new Date(a));
+
+            if (!uniqueDates.length) return 0;
+
+            let streak = 0;
+            let cursor = new Date();
+            cursor.setHours(0, 0, 0, 0);
+
+            for (const dateValue of uniqueDates) {
+                const current = new Date(dateValue + 'T12:00:00');
+                current.setHours(0, 0, 0, 0);
+                const diffInDays = Math.round((cursor - current) / 86400000);
+
+                if (diffInDays === 0 || diffInDays === 1) {
+                    streak += 1;
+                    cursor = current;
+                } else {
+                    break;
+                }
+            }
+
+            return streak;
         }
 
         function sanitizeStoredData(raw) {
@@ -365,7 +476,17 @@
                         title: sanitizeText(item.title, 120),
                         points: clampNumber(item.points, 0, 5000),
                         status: item.status === 'pending_approval' ? 'pending_approval' : 'active',
-                        timestamp: Number(item.timestamp) || Date.now()
+                        timestamp: Number(item.timestamp) || Date.now(),
+                        category: normalizeCategory(item.category),
+                        dueDate: getDateString(item.dueDate),
+                        repeat: normalizeRepeat(item.repeat),
+                        completionHistory: [...new Set((Array.isArray(item.completionHistory) ? item.completionHistory : [])
+                            .map(value => getDateString(value))
+                            .filter(Boolean))]
+                            .sort((a, b) => new Date(b) - new Date(a))
+                            .slice(0, 90),
+                        streakCount: clampNumber(item.streakCount || calculateChoreStreak((Array.isArray(item.completionHistory) ? item.completionHistory : [])), 0, 365),
+                        lastCompletedAt: Number(item.lastCompletedAt) || null
                     }))
                     .filter(item => item.title.length > 0),
                 redeemedPrizes: redeemedPrizes
@@ -503,7 +624,13 @@
                         title: sanitizeText(suggestion.title, 120),
                         points: clampNumber(suggestion.points, 0, 5000),
                         status: 'active',
-                        timestamp: Date.now()
+                        timestamp: Date.now(),
+                        category: 'General',
+                        dueDate: '',
+                        repeat: 'none',
+                        completionHistory: [],
+                        streakCount: 0,
+                        lastCompletedAt: null
                     });
                 });
 
@@ -645,6 +772,7 @@
 
             updateUI() {
                 this.updatePointsUI();
+                this.updateChoreTrackingStats();
                 this.renderChores();
                 this.renderPrizes();
                 this.renderRedeemedPrizes();
@@ -660,6 +788,29 @@
                 });
             },
 
+            updateChoreTrackingStats() {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const dueSoon = this.chores.filter(chore => chore.status !== 'pending_approval' && chore.dueDate).filter(chore => {
+                    const dueDate = new Date(chore.dueDate + 'T12:00:00');
+                    dueDate.setHours(0, 0, 0, 0);
+                    const diffDays = Math.round((dueDate - today) / 86400000);
+                    return diffDays >= 0 && diffDays <= 7;
+                }).length;
+
+                const recurring = this.chores.filter(chore => chore.repeat && chore.repeat !== 'none').length;
+                const bestStreak = this.chores.reduce((maxValue, chore) => Math.max(maxValue, Number(chore.streakCount) || 0), 0);
+
+                const dueSoonElement = document.getElementById('stats-due-soon');
+                const recurringElement = document.getElementById('stats-recurring');
+                const bestStreakElement = document.getElementById('stats-best-streak');
+
+                if (dueSoonElement) dueSoonElement.textContent = String(dueSoon);
+                if (recurringElement) recurringElement.textContent = String(recurring);
+                if (bestStreakElement) bestStreakElement.textContent = `${bestStreak} day${bestStreak === 1 ? '' : 's'}`;
+            },
+
             scrollToSection(sectionId) {
                 const element = document.getElementById(sectionId);
                 if (element) {
@@ -670,9 +821,15 @@
             async addChore(title = null, points = null) {
                 const inputTitle = document.getElementById('new-chore-title');
                 const inputPoints = document.getElementById('new-chore-points');
+                const inputCategory = document.getElementById('new-chore-category');
+                const inputDueDate = document.getElementById('new-chore-due-date');
+                const inputRepeat = document.getElementById('new-chore-repeat');
 
                 const choreTitle = sanitizeText(title || (inputTitle ? inputTitle.value : ''), 120);
                 const chorePoints = clampNumber(points ?? (inputPoints ? parseInt(inputPoints.value) : NaN), 0, 5000);
+                const choreCategory = normalizeCategory(inputCategory ? inputCategory.value : 'General');
+                const choreDueDate = inputDueDate ? getDateString(inputDueDate.value) : '';
+                const choreRepeat = normalizeRepeat(inputRepeat ? inputRepeat.value : 'none');
 
                 if (!choreTitle || chorePoints <= 0) {
                     this.showToast('Please enter a valid chore and points.', 'error');
@@ -684,7 +841,13 @@
                     title: choreTitle,
                     points: chorePoints,
                     status: 'active',
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    category: choreCategory,
+                    dueDate: choreDueDate,
+                    repeat: choreRepeat,
+                    completionHistory: [],
+                    streakCount: 0,
+                    lastCompletedAt: null
                 };
 
                 this.chores.unshift(newChore);
@@ -692,6 +855,9 @@
 
                 if (!title && inputTitle) inputTitle.value = '';
                 if (!title && inputPoints) inputPoints.value = '';
+                if (!title && inputCategory) inputCategory.value = 'General';
+                if (!title && inputDueDate) inputDueDate.value = '';
+                if (!title && inputRepeat) inputRepeat.value = 'none';
 
                 this.showToast(`Added chore: ${choreTitle}`, 'success');
             },
@@ -764,8 +930,26 @@
 
                 const choreIndex = this.chores.findIndex(c => c.id === choreId);
                 if (choreIndex > -1) {
-                    this.chores.splice(choreIndex, 1);
+                    const chore = this.chores[choreIndex];
+                    const completionDate = getDateString(new Date());
+
+                    chore.completionHistory = [...new Set([...(Array.isArray(chore.completionHistory) ? chore.completionHistory : []), completionDate])]
+                        .sort((a, b) => new Date(b) - new Date(a))
+                        .slice(0, 90);
+                    chore.streakCount = calculateChoreStreak(chore.completionHistory);
+                    chore.lastCompletedAt = Date.now();
+
                     this.points += safePoints;
+
+                    if (chore.repeat && chore.repeat !== 'none') {
+                        chore.dueDate = getNextDueDate(chore.dueDate || completionDate, chore.repeat);
+                        chore.status = 'active';
+                        this.saveData();
+                        this.showToast(`Chore approved! +${safePoints} pts. ${chore.repeat.charAt(0).toUpperCase() + chore.repeat.slice(1)} repeat scheduled.`, 'success');
+                        return;
+                    }
+
+                    this.chores.splice(choreIndex, 1);
                     this.saveData();
                     this.showToast(`Chore approved! +${safePoints} pts`, 'success');
                 }
@@ -827,38 +1011,58 @@
                 this.chores.forEach(chore => {
                     const isPending = chore.status === 'pending_approval';
                     const el = document.createElement('div');
-                    el.className = `glass-panel p-4 rounded-xl mb-4 flex justify-between items-center animate-fade-in border-l-4 ${isPending ? 'border-orange-400 opacity-70' : 'border-yellow-400'} `;
+                    el.className = `glass-panel p-4 rounded-xl mb-4 flex justify-between items-center animate-fade-in border-l-4 ${isPending ? 'border-orange-400 opacity-70' : 'border-yellow-400'}`;
 
                     const safeTitle = escapeHtml(chore.title);
                     const safePoints = escapeHtml(chore.points);
+                    const categoryLabel = escapeHtml(normalizeCategory(chore.category));
+                    const repeatText = chore.repeat && chore.repeat !== 'none' ? ` ${chore.repeat.charAt(0).toUpperCase() + chore.repeat.slice(1)}` : 'One time';
+                    const streakText = Number(chore.streakCount) > 0 ? `🔥 ${chore.streakCount}-day streak` : 'No streak yet';
+                    const historyText = Array.isArray(chore.completionHistory) && chore.completionHistory.length
+                        ? `History: ${chore.completionHistory.slice(-3).reverse().map(date => formatDisplayDate(date)).join(' • ')}`
+                        : 'Completion history will show here';
+                    const dueChip = chore.dueDate
+                        ? `<span class="text-[10px] uppercase tracking-wider bg-blue-500/20 text-blue-200 px-2 py-0.5 rounded border border-blue-400/30">${escapeHtml(formatDueDateLabel(chore.dueDate))}</span>`
+                        : '<span class="text-[10px] uppercase tracking-wider bg-gray-500/20 text-gray-200 px-2 py-0.5 rounded border border-gray-400/30">No due date</span>';
 
                     if (isPending) {
                         el.innerHTML = `
                             <div class="flex-1">
                                 <h4 class="text-lg font-semibold text-gray-200 line-through">${safeTitle}</h4>
-                                <div class="flex items-center gap-2 mt-1">
+                                <div class="flex flex-wrap items-center gap-2 mt-2">
                                     <p class="text-sm text-yellow-300/50 font-bold">${safePoints} pts</p>
                                     <span class="text-[10px] uppercase font-bold tracking-wider bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded border border-orange-500/30">Pending Review</span>
+                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-slate-500/20 text-slate-200 px-2 py-0.5 rounded border border-slate-400/30">${categoryLabel}</span>
+                                    ${dueChip}
                                 </div>
+                                <p class="text-[11px] text-gray-300 mt-2">${streakText}</p>
+                                <p class="text-[11px] text-gray-400 mt-1">${escapeHtml(historyText)}</p>
                             </div>
                             <div class="flex gap-2 ml-2 flex-wrap md:flex-nowrap justify-end mt-2 md:mt-0">
-                                <button onclick="app.sendEmailDraft('${chore.id}')" class="glass-button bg-pink-500/30 hover:bg-pink-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-envelope mr-2"></i> Send Reminder
+                                <button onclick="app.sendEmailDraft('${chore.id}')" class="glass-button bg-pink-500/30 hover:bg-pink-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center gap-2">
+                                    <i class="fas fa-envelope"></i> Send Reminder
                                 </button>
-                                <button onclick="app.deletePendingChore('${chore.id}')" class="glass-button bg-red-500/30 hover:bg-red-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-trash mr-2"></i> Delete
+                                <button onclick="app.deletePendingChore('${chore.id}')" class="glass-button bg-red-500/30 hover:bg-red-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center gap-2">
+                                    <i class="fas fa-trash"></i> Delete
                                 </button>
                             </div>
                         `;
                     } else {
                         el.innerHTML = `
-                            <div>
+                            <div class="flex-1">
                                 <h4 class="text-lg font-semibold">${safeTitle}</h4>
-                                <p class="text-sm text-yellow-300 font-bold">${safePoints} pts</p>
+                                <div class="flex flex-wrap items-center gap-2 mt-2">
+                                    <p class="text-sm text-yellow-300 font-bold">${safePoints} pts</p>
+                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-purple-500/20 text-purple-200 px-2 py-0.5 rounded border border-purple-400/30">${categoryLabel}</span>
+                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-200 px-2 py-0.5 rounded border border-emerald-400/30">${repeatText}</span>
+                                    ${dueChip}
+                                </div>
+                                <p class="text-[11px] text-gray-200 mt-2">${streakText}</p>
+                                <p class="text-[11px] text-gray-300 mt-1">${escapeHtml(historyText)}</p>
                             </div>
-                            <button onclick="app.completeChore('${makeSafeJsString(chore.id)}', '${makeSafeJsString(chore.title)}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/50 text-white p-3 rounded-xl flex items-center justify-center group shadow-lg" title="Submit for parent approval">
-                                <span class="mr-2 text-sm font-bold">Submit</span>
-                                <i class="fas fa-check text-xl group-hover:scale-125 transition-transform"></i>
+                            <button onclick="app.completeChore('${makeSafeJsString(chore.id)}', '${makeSafeJsString(chore.title)}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/40 text-white p-3 px-4 rounded-xl flex items-center justify-center gap-2 font-bold">
+                                <span>Submit</span>
+                                <i class="fas fa-check text-xl"></i>
                             </button>
                         `;
                     }
@@ -893,7 +1097,7 @@
                             <button ${!canAfford ? 'disabled' : ''} onclick="app.redeemPrize('${prize.id}')" class="w-full py-2 rounded-xl font-bold transition-all ${btnClass}">
                                 ${canAfford ? 'Redeem' : 'Need more pts'}
                             </button>
-                            ${isCustomPrize ? `<button onclick="app.removeCustomPrize('${prize.id}')" class="w-full mt-3 py-2 rounded-xl font-bold transition-all bg-red-500/30 hover:bg-red-500/50 text-white border border-red-400/30">Remove</button>` : ''}
+                            ${isCustomPrize ? `<button onclick="app.removeCustomPrize('${prize.id}')" class="w-full mt-3 py-2 rounded-xl font-bold transition-all bg-red-500/30 hover:bg-red-500/50 text-white">Remove</button>` : ''}
                         </div>
                     `;
                     container.appendChild(el);
