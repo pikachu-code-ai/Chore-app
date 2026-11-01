@@ -253,14 +253,19 @@
                 </div>
             </header>
 
-            <div class="flex-1 flex flex-col items-center justify-center opacity-80 mt-8">
+            <div class="mb-8">
+                <p class="text-xs uppercase tracking-[0.2em] text-gray-200 mb-3">Current child</p>
+                <div id="profile-tabs" class="flex flex-wrap gap-3"></div>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-center opacity-80 mt-4">
                 <div class="relative w-64 h-64 logo-bounce mb-8">
                     <div class="absolute inset-0 bg-yellow-400 rounded-full blur-3xl opacity-30"></div>
                     <div class="w-full h-full rounded-3xl relative z-10 bg-white/10 backdrop-blur-sm p-4 flex items-center justify-center border border-white/20 shadow-2xl">
                         <i class="fas fa-piggy-bank text-9xl text-yellow-400 drop-shadow-2xl"></i>
                     </div>
                 </div>
-                <h3 class="text-2xl font-bold mb-2">Do Chores. Earn Rewards.</h3>
+                <h3 id="active-profile-name" class="text-2xl font-bold mb-2">Kid 1</h3>
                 <p class="text-center max-w-md text-gray-200">Scroll down to see what needs to be done, or check out the prizes you can claim!</p>
             </div>
         </section>
@@ -326,19 +331,10 @@
                         <h3 class="text-xl font-bold mb-2 flex items-center gap-2">
                             <i class="fas fa-magic text-yellow-300"></i> AI Suggestions
                         </h3>
-                        <p class="text-sm text-gray-200 mb-4">Need ideas? Let Gemini suggest fun chores!</p>
-                        <button type="button" onclick="app.suggestChores()" id="btn-suggest-chores" class="w-full glass-button bg-white/20 hover:bg-white/30 rounded-xl py-3 font-bold flex justify-center items-center gap-2">
-                            <span>Suggest Fun Chores</span>
+                        <p class="text-sm text-gray-200 mb-4">Need ideas? Add a few quick chores to get started.</p>
+                        <button type="button" onclick="app.addSuggestedBatch()" class="w-full glass-button bg-white/20 hover:bg-white/30 rounded-xl py-3 font-bold">
+                            Add a Fun Chore Pack
                         </button>
-
-                        <div id="ai-suggestions-preview" class="hidden mt-4">
-                            <p class="text-xs uppercase tracking-wider text-gray-300 mb-2">Ready to add</p>
-                            <ul id="ai-suggestions-list" class="space-y-2 mb-4 text-sm text-gray-100"></ul>
-                            <div class="flex gap-2">
-                                <button type="button" onclick="app.confirmSuggestedChores()" class="flex-1 glass-button bg-green-500/30 hover:bg-green-500/50 rounded-xl py-2 font-bold">Confirm</button>
-                                <button type="button" onclick="app.cancelSuggestedChores()" class="flex-1 glass-button bg-red-500/30 hover:bg-red-500/50 rounded-xl py-2 font-bold">Cancel</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -348,7 +344,7 @@
             <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
                 <h2 class="text-4xl font-bold"><i class="fas fa-trophy text-yellow-400 mr-3"></i>Prize Room</h2>
                 <div class="glass-panel px-6 py-3 rounded-2xl border-yellow-400/50 border shadow-[0_0_15px_rgba(250,204,21,0.3)]">
-                    <span class="text-sm uppercase tracking-wider text-gray-200 block text-center">Your Balance</span>
+                    <span class="text-sm uppercase tracking-wider text-gray-200 block text-center">Balance</span>
                     <span class="text-3xl font-bold text-yellow-300" id="prizes-points-display">0</span> <span class="text-yellow-100">pts</span>
                 </div>
             </div>
@@ -366,7 +362,7 @@
                 <h3 class="text-2xl font-semibold mb-4 border-b border-white/20 pb-2">Available Prizes</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12" id="available-prizes-container"></div>
 
-                <h3 class="text-2xl font-semibold mb-4 border-b border-white/20 pb-2 mt-8">Your Redeemed Prizes</h3>
+                <h3 class="text-2xl font-semibold mb-4 border-b border-white/20 pb-2 mt-8">Redeemed Prizes</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="redeemed-prizes-container"></div>
             </div>
         </section>
@@ -379,7 +375,7 @@
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-shield-alt text-blue-400"></i> Parental Controls
                     </h3>
-                    <p class="text-sm text-gray-200 mb-4">Set a parent's email address to receive chore approval requests when chores are finished.</p>
+                    <p class="text-sm text-gray-200 mb-4">Set a parent's email address so chores can be approved.</p>
                     <div class="mb-4 rounded-xl border border-yellow-400/40 bg-yellow-400/10 px-3 py-2 text-xs text-yellow-100">
                         <strong>Important:</strong> chores need a saved parent email before they can be submitted for approval.
                     </div>
@@ -394,19 +390,21 @@
 
                 <div class="glass-panel p-6 rounded-2xl mb-6">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
-                        <i class="fas fa-chart-line text-pink-400"></i> Chore Tracking
+                        <i class="fas fa-users text-pink-400"></i> Child Profiles
                     </h3>
-                    <div class="space-y-3 text-sm text-gray-100">
-                        <div class="flex justify-between items-center"><span>Due soon</span><strong id="stats-due-soon">0</strong></div>
-                        <div class="flex justify-between items-center"><span>Recurring chores</span><strong id="stats-recurring">0</strong></div>
-                        <div class="flex justify-between items-center"><span>Best streak</span><strong id="stats-best-streak">0 days</strong></div>
-                    </div>
+                    <div id="profile-list" class="space-y-3 mb-4"></div>
+                    <form onsubmit="app.addChildProfile(event); return false;" class="flex flex-col gap-3">
+                        <input type="text" id="new-child-name" placeholder="Child name" class="w-full px-4 py-3 rounded-xl glass-input" />
+                        <button type="submit" class="w-full glass-button bg-pink-500/30 hover:bg-pink-500/50 rounded-xl py-3 font-bold">
+                            Add Child Profile
+                        </button>
+                    </form>
                 </div>
 
                 <div class="glass-panel p-6 rounded-2xl text-center">
                     <h3 class="text-xl font-bold mb-2">App Info</h3>
-                    <p class="text-sm text-gray-300 mb-1">Version: 1.2 (Improved UX)</p>
-                    <p class="text-sm text-gray-300">Powered by Firebase & Gemini API</p>
+                    <p class="text-sm text-gray-300 mb-1">Version: 2.0 (Child Profiles)</p>
+                    <p class="text-sm text-gray-300">Runs entirely in your browser with local storage</p>
                 </div>
             </div>
         </section>
@@ -415,185 +413,17 @@
     </main>
 
     <script>
-        function escapeHtml(value) {
-            return String(value ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
+        const STORAGE_KEY = 'kaching_data_v2';
+        const DEFAULT_COLORS = ['bg-yellow-400', 'bg-pink-400', 'bg-blue-400', 'bg-violet-400', 'bg-emerald-400', 'bg-orange-400'];
 
-        function getDateString(value) {
-            if (!value) return '';
-            const date = new Date(value);
-            if (Number.isNaN(date.getTime())) return '';
-            return date.toISOString().split('T')[0];
-        }
-
-        function normalizeEmail(value) {
-            return String(value || '').trim().toLowerCase();
-        }
-
-        function clampNumber(value, min, max) {
-            const num = Number(value);
-            if (!Number.isFinite(num)) return min;
-            return Math.max(min, Math.min(max, num));
-        }
-
-        function sanitizeText(value, maxLength = 80) {
-            if (value === null || value === undefined) return '';
-            return String(value).replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, maxLength);
-        }
-
-        function normalizeCategory(value) {
-            const allowedCategories = ['General', 'Cleaning', 'Kitchen', 'Outside', 'Laundry', 'Bathroom', 'Bedroom', 'Pets'];
-            const candidate = sanitizeText(value || '', 30);
-            return allowedCategories.includes(candidate) ? candidate : 'General';
-        }
-
-        function normalizeRepeat(value) {
-            const candidate = sanitizeText(value || '', 20).toLowerCase();
-            return ['daily', 'weekly', 'monthly'].includes(candidate) ? candidate : 'none';
-        }
-
-        function formatDisplayDate(dateString) {
-            if (!dateString) return 'No due date';
-            const date = new Date(dateString + 'T12:00:00');
-            if (Number.isNaN(date.getTime())) return 'No due date';
-            return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        }
-
-        function formatDueDateLabel(dateString) {
-            if (!dateString) return 'No due date';
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const dueDate = new Date(dateString + 'T12:00:00');
-            dueDate.setHours(0, 0, 0, 0);
-            const diffDays = Math.round((dueDate - today) / 86400000);
-
-            if (diffDays === 0) return 'Due today';
-            if (diffDays === 1) return 'Due tomorrow';
-            if (diffDays < 0) return `${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? '' : 's'} overdue`;
-            return `Due in ${diffDays} days`;
-        }
-
-        function getNextDueDate(dateString, repeatValue) {
-            const repeat = normalizeRepeat(repeatValue);
-            if (repeat === 'none') return '';
-
-            const baseDate = dateString ? new Date(dateString + 'T12:00:00') : new Date();
-            const amount = repeat === 'daily' ? 1 : repeat === 'weekly' ? 7 : 30;
-            baseDate.setDate(baseDate.getDate() + amount);
-            return getDateString(baseDate);
-        }
-
-        function calculateChoreStreak(historyDates) {
-            const uniqueDates = [...new Set((Array.isArray(historyDates) ? historyDates : [])
-                .map(date => sanitizeText(date, 12))
-                .filter(Boolean))]
-                .sort((a, b) => new Date(b) - new Date(a));
-
-            if (!uniqueDates.length) return 0;
-
-            let streak = 0;
-            let cursor = new Date();
-            cursor.setHours(0, 0, 0, 0);
-
-            for (const dateValue of uniqueDates) {
-                const current = new Date(dateValue + 'T12:00:00');
-                current.setHours(0, 0, 0, 0);
-                const diffInDays = Math.round((cursor - current) / 86400000);
-
-                if (diffInDays === 0 || diffInDays === 1) {
-                    streak += 1;
-                    cursor = current;
-                } else {
-                    break;
-                }
-            }
-
-            return streak;
-        }
-
-        function sanitizeStoredData(raw) {
-            const defaults = {
-                points: 0,
-                parentEmail: null,
-                chores: [],
-                redeemedPrizes: [],
-                customPrizes: []
-            };
-
-            if (!raw || typeof raw !== 'object') {
-                return defaults;
-            }
-
-            const chores = Array.isArray(raw.chores) ? raw.chores : [];
-            const redeemedPrizes = Array.isArray(raw.redeemedPrizes) ? raw.redeemedPrizes : [];
-            const customPrizes = Array.isArray(raw.customPrizes) ? raw.customPrizes : [];
-
-            return {
-                points: clampNumber(raw.points, 0, 100000),
-                parentEmail: normalizeEmail(raw.parentEmail || null),
-                chores: chores
-                    .filter(item => item && typeof item === 'object')
-                    .map(item => ({
-                        id: sanitizeText(item.id, 50) || `chore_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-                        title: sanitizeText(item.title, 120),
-                        points: clampNumber(item.points, 0, 5000),
-                        status: item.status === 'pending_approval' ? 'pending_approval' : 'active',
-                        timestamp: Number(item.timestamp) || Date.now(),
-                        category: normalizeCategory(item.category),
-                        dueDate: getDateString(item.dueDate),
-                        repeat: normalizeRepeat(item.repeat),
-                        completionHistory: [...new Set((Array.isArray(item.completionHistory) ? item.completionHistory : [])
-                            .map(value => getDateString(value))
-                            .filter(Boolean))]
-                            .sort((a, b) => new Date(b) - new Date(a))
-                            .slice(0, 90),
-                        streakCount: clampNumber(item.streakCount || calculateChoreStreak((Array.isArray(item.completionHistory) ? item.completionHistory : [])), 0, 365),
-                        lastCompletedAt: Number(item.lastCompletedAt) || null
-                    }))
-                    .filter(item => item.title.length > 0),
-                redeemedPrizes: redeemedPrizes
-                    .filter(item => item && typeof item === 'object')
-                    .map(item => ({
-                        title: sanitizeText(item.title, 120),
-                        icon: sanitizeText(item.icon, 50),
-                        cost: clampNumber(item.cost, 0, 100000),
-                        timestamp: Number(item.timestamp) || Date.now()
-                    }))
-                    .filter(item => item.title.length > 0),
-                customPrizes: customPrizes
-                    .filter(item => item && typeof item === 'object')
-                    .map(item => ({
-                        id: sanitizeText(item.id, 50) || `custom_prize_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-                        title: sanitizeText(item.title, 120),
-                        cost: clampNumber(item.cost, 0, 100000),
-                        icon: sanitizeText(item.icon, 50) || 'fa-gift',
-                        color: sanitizeText(item.color, 50) || 'bg-emerald-500'
-                    }))
-                    .filter(item => item.title.length > 0)
-            };
-        }
-
-        function makeSafeJsString(value) {
-            return String(value ?? '')
-                .replace(/\\/g, '\\\\')
-                .replace(/'/g, "\\'")
-                .replace(/\r/g, '')
-                .replace(/\n/g, ' ');
-        }
-
-        window.app = {
+        const app = {
+            profiles: [],
+            activeProfileId: null,
             points: 0,
             parentEmail: null,
             chores: [],
             redeemedPrizes: [],
             customPrizes: [],
-            pendingSuggestions: [],
-
             defaultPrizes: [
                 { id: 'p1', title: 'Extra Screen Time (30m)', cost: 50, icon: 'fa-gamepad', color: 'bg-blue-500' },
                 { id: 'p2', title: 'Pick Movie Night', cost: 100, icon: 'fa-film', color: 'bg-purple-500' },
@@ -602,7 +432,6 @@
                 { id: 'p5', title: 'Ice Cream Trip', cost: 150, icon: 'fa-ice-cream', color: 'bg-pink-500' },
                 { id: 'p6', title: 'Skip One Chore', cost: 300, icon: 'fa-forward-step', color: 'bg-teal-500' }
             ],
-
             choreSuggestionPool: [
                 { title: 'Vacuum the Living Room', points: 25 },
                 { title: 'Fold Laundry and Put It Away', points: 20 },
@@ -624,647 +453,672 @@
                 { title: 'Vacuum the Car Seats', points: 28 },
                 { title: 'Straighten the Bookshelf', points: 20 },
                 { title: 'Clean the Front Entryway', points: 18 }
-            ],
-
-            getRandomizedSuggestions(count = 3) {
-                const pool = [...this.choreSuggestionPool];
-                for (let i = pool.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [pool[i], pool[j]] = [pool[j], pool[i]];
-                }
-                return pool.slice(0, Math.min(count, pool.length));
-            },
-
-            renderSuggestionPreview(suggestions = []) {
-                const preview = document.getElementById('ai-suggestions-preview');
-                const list = document.getElementById('ai-suggestions-list');
-                if (!preview || !list) return;
-
-                if (!suggestions.length) {
-                    preview.classList.add('hidden');
-                    list.innerHTML = '';
-                    return;
-                }
-
-                list.innerHTML = suggestions.map(item => `
-                    <li class="flex items-center justify-between gap-3 rounded-lg bg-white/10 px-3 py-2">
-                        <span class="truncate">${escapeHtml(item.title)}</span>
-                        <span class="font-bold text-yellow-300">${item.points} pts</span>
-                    </li>
-                `).join('');
-                preview.classList.remove('hidden');
-            },
-
-            cancelSuggestedChores() {
-                this.pendingSuggestions = [];
-                this.renderSuggestionPreview([]);
-                const btn = document.getElementById('btn-suggest-chores');
-                if (btn) {
-                    btn.innerHTML = '<span>Suggest Fun Chores</span>';
-                    btn.disabled = false;
-                }
-            },
-
-            confirmSuggestedChores() {
-                if (!this.pendingSuggestions.length) {
-                    this.showToast('No suggestions to add yet.', 'info');
-                    return;
-                }
-
-                const suggestions = [...this.pendingSuggestions];
-                const validSuggestions = suggestions.filter(suggestion => {
-                    const title = sanitizeText(suggestion.title, 120);
-                    const points = clampNumber(suggestion.points, 0, 5000);
-                    return !!title && points > 0;
-                });
-
-                if (!validSuggestions.length) {
-                    this.pendingSuggestions = [];
-                    this.renderSuggestionPreview([]);
-                    this.showToast('No valid suggestions found.', 'error');
-                    return;
-                }
-
-                validSuggestions.forEach(suggestion => {
-                    this.chores.unshift({
-                        id: 'chore_' + Date.now() + '_' + Math.random().toString(16).slice(2),
-                        title: sanitizeText(suggestion.title, 120),
-                        points: clampNumber(suggestion.points, 0, 5000),
-                        status: 'active',
-                        timestamp: Date.now(),
-                        category: 'General',
-                        dueDate: '',
-                        repeat: 'none',
-                        completionHistory: [],
-                        streakCount: 0,
-                        lastCompletedAt: null
-                    });
-                });
-
-                this.pendingSuggestions = [];
-                this.renderSuggestionPreview([]);
-                this.saveData();
-
-                const btn = document.getElementById('btn-suggest-chores');
-                if (btn) {
-                    btn.innerHTML = '<span>Suggest Fun Chores</span>';
-                    btn.disabled = false;
-                }
-
-                this.showToast(`Added ${validSuggestions.length} fresh suggestions!`, 'success');
-            },
-
-            hasParentEmail() {
-                return !!this.parentEmail && this.parentEmail.includes('@');
-            },
-
-            requireParentEmail() {
-                if (!this.hasParentEmail()) {
-                    const settingsSection = document.getElementById('view-etc');
-                    if (settingsSection) settingsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    const parentInput = document.getElementById('parent-email-input');
-                    if (parentInput) {
-                        parentInput.focus();
-                        parentInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                    this.showToast('Save a parent email before submitting a chore for approval.', 'info');
-                    return false;
-                }
-                return true;
-            },
-
-            async init() {
-                try {
-                    this.loadData();
-
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const approveChoreId = urlParams.get('approve_chore');
-                    const approvePts = parseInt(urlParams.get('pts'));
-
-                    if (approveChoreId && !isNaN(approvePts)) {
-                        await this.handleParentApproval(approveChoreId, approvePts);
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                    }
-
-                    setTimeout(() => {
-                        const overlay = document.getElementById('loading-overlay');
-                        if (overlay) overlay.style.display = 'none';
-                        if (!this.parentEmail) {
-                            const onboarding = document.getElementById('email-onboarding-modal');
-                            if (onboarding) onboarding.classList.remove('hidden');
-                        }
-                    }, 800);
-                } catch (error) {
-                    console.error('Init Error:', error);
-                    this.showToast('Failed to load data.', 'error');
-                    const overlay = document.getElementById('loading-overlay');
-                    if (overlay) overlay.style.display = 'none';
-                }
-            },
-
-            loadData() {
-                try {
-                    const saved = localStorage.getItem('kaching_data');
-                    if (saved) {
-                        const parsed = JSON.parse(saved);
-                        const data = sanitizeStoredData(parsed);
-                        this.points = data.points;
-                        this.parentEmail = data.parentEmail || null;
-                        this.chores = data.chores;
-                        this.redeemedPrizes = data.redeemedPrizes;
-                        this.customPrizes = data.customPrizes;
-                    }
-                } catch (e) {
-                    console.warn('Local storage access blocked by browser or data was malformed; resetting to safe defaults.');
-                    this.points = 0;
-                    this.parentEmail = null;
-                    this.chores = [];
-                    this.redeemedPrizes = [];
-                    this.customPrizes = [];
-                }
-
-                const emailInput = document.getElementById('parent-email-input');
-                if (emailInput && this.parentEmail) {
-                    emailInput.value = this.parentEmail;
-                }
-
-                this.updateUI();
-            },
-
-            saveData() {
-                try {
-                    const safeData = sanitizeStoredData({
-                        points: this.points,
-                        parentEmail: this.parentEmail,
-                        chores: this.chores,
-                        redeemedPrizes: this.redeemedPrizes,
-                        customPrizes: this.customPrizes
-                    });
-
-                    localStorage.setItem('kaching_data', JSON.stringify({
-                        points: safeData.points,
-                        parentEmail: safeData.parentEmail,
-                        chores: safeData.chores,
-                        redeemedPrizes: safeData.redeemedPrizes,
-                        customPrizes: safeData.customPrizes
-                    }));
-                } catch (e) {
-                    console.warn('Local storage access blocked by browser, could not save data permanently.');
-                }
-                this.updateUI();
-            },
-
-            submitInitialParentEmail(event) {
-                if (event) event.preventDefault();
-
-                const emailInput = document.getElementById('onboarding-email-input');
-                const parentEmail = normalizeEmail(emailInput ? emailInput.value : '');
-
-                if (!parentEmail || !parentEmail.includes('@')) {
-                    this.showToast('Please enter a valid email address.', 'error');
-                    return;
-                }
-
-                this.parentEmail = parentEmail;
-                this.saveData();
-
-                const modal = document.getElementById('email-onboarding-modal');
-                if (modal) modal.classList.add('hidden');
-
-                const settingsEmailInput = document.getElementById('parent-email-input');
-                if (settingsEmailInput) settingsEmailInput.value = this.parentEmail;
-
-                this.showToast('Awesome! You\'re all set.', 'success');
-            },
-
-            updateUI() {
-                this.updatePointsUI();
-                this.updateChoreTrackingStats();
-                this.renderChores();
-                this.renderPrizes();
-                this.renderRedeemedPrizes();
-            },
-
-            updatePointsUI() {
-                const els = ['home-points-display', 'chores-points-display', 'prizes-points-display'];
-                els.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) {
-                        el.textContent = id.includes('chores') ? `${this.points} pts` : this.points;
-                    }
-                });
-            },
-
-            updateChoreTrackingStats() {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
-                const dueSoon = this.chores.filter(chore => chore.status !== 'pending_approval' && chore.dueDate).filter(chore => {
-                    const dueDate = new Date(chore.dueDate + 'T12:00:00');
-                    dueDate.setHours(0, 0, 0, 0);
-                    const diffDays = Math.round((dueDate - today) / 86400000);
-                    return diffDays >= 0 && diffDays <= 7;
-                }).length;
-
-                const recurring = this.chores.filter(chore => chore.repeat && chore.repeat !== 'none').length;
-                const bestStreak = this.chores.reduce((maxValue, chore) => Math.max(maxValue, Number(chore.streakCount) || 0), 0);
-
-                const dueSoonElement = document.getElementById('stats-due-soon');
-                const recurringElement = document.getElementById('stats-recurring');
-                const bestStreakElement = document.getElementById('stats-best-streak');
-
-                if (dueSoonElement) dueSoonElement.textContent = String(dueSoon);
-                if (recurringElement) recurringElement.textContent = String(recurring);
-                if (bestStreakElement) bestStreakElement.textContent = `${bestStreak} day${bestStreak === 1 ? '' : 's'}`;
-            },
-
-            scrollToSection(sectionId) {
-                const element = document.getElementById(sectionId);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' });
-                }
-            },
-
-            async addChore(title = null, points = null) {
-                const inputTitle = document.getElementById('new-chore-title');
-                const inputPoints = document.getElementById('new-chore-points');
-                const inputCategory = document.getElementById('new-chore-category');
-                const inputDueDate = document.getElementById('new-chore-due-date');
-                const inputRepeat = document.getElementById('new-chore-repeat');
-
-                const choreTitle = sanitizeText(title || (inputTitle ? inputTitle.value : ''), 120);
-                const chorePoints = clampNumber(points ?? (inputPoints ? parseInt(inputPoints.value) : NaN), 0, 5000);
-                const choreCategory = normalizeCategory(inputCategory ? inputCategory.value : 'General');
-                const choreDueDate = inputDueDate ? getDateString(inputDueDate.value) : '';
-                const choreRepeat = normalizeRepeat(inputRepeat ? inputRepeat.value : 'none');
-
-                if (!choreTitle || chorePoints <= 0) {
-                    this.showToast('Please enter a valid chore and points.', 'error');
-                    return;
-                }
-
-                const newChore = {
-                    id: 'chore_' + Date.now(),
-                    title: choreTitle,
-                    points: chorePoints,
-                    status: 'active',
-                    timestamp: Date.now(),
-                    category: choreCategory,
-                    dueDate: choreDueDate,
-                    repeat: choreRepeat,
-                    completionHistory: [],
-                    streakCount: 0,
-                    lastCompletedAt: null
-                };
-
-                this.chores.unshift(newChore);
-                this.saveData();
-
-                if (!title && inputTitle) inputTitle.value = '';
-                if (!title && inputPoints) inputPoints.value = '';
-                if (!title && inputCategory) inputCategory.value = 'General';
-                if (!title && inputDueDate) inputDueDate.value = '';
-                if (!title && inputRepeat) inputRepeat.value = 'none';
-
-                this.showToast(`Added chore: ${choreTitle}`, 'success');
-            },
-
-            async addPrize(title = null, cost = null) {
-                const inputTitle = document.getElementById('new-prize-title');
-                const inputCost = document.getElementById('new-prize-cost');
-
-                const prizeTitle = sanitizeText(title || (inputTitle ? inputTitle.value : ''), 120);
-                const prizeCost = clampNumber(cost ?? (inputCost ? parseInt(inputCost.value) : NaN), 0, 100000);
-
-                if (!prizeTitle || prizeCost <= 0) {
-                    this.showToast('Please enter a valid prize name and cost.', 'error');
-                    return;
-                }
-
-                const newPrize = {
-                    id: 'custom_prize_' + Date.now(),
-                    title: prizeTitle,
-                    cost: prizeCost,
-                    icon: 'fa-gift',
-                    color: 'bg-emerald-500'
-                };
-
-                this.customPrizes.unshift(newPrize);
-                this.saveData();
-
-                if (!title && inputTitle) inputTitle.value = '';
-                if (!title && inputCost) inputCost.value = '';
-
-                this.showToast(`Added prize: ${prizeTitle}`, 'success');
-            },
-
-            async removeCustomPrize(prizeId) {
-                const confirmed = window.confirm('Remove this custom prize?');
-                if (!confirmed) return;
-
-                this.customPrizes = this.customPrizes.filter(prize => prize.id !== prizeId);
-                this.saveData();
-                this.showToast('Custom prize removed.', 'info');
-            },
-
-            async completeChore(choreId, choreTitle, chorePoints) {
-                if (!this.requireParentEmail()) return;
-
-                const confirmed = window.confirm(`Submit "${choreTitle}" for approval and send your parent a request for ${chorePoints} points?`);
-                if (!confirmed) return;
-
-                const choreIndex = this.chores.findIndex(c => c.id === choreId);
-                if (choreIndex > -1) {
-                    this.chores[choreIndex].status = 'pending_approval';
-                    this.saveData();
-                    this.showToast(`Submitted for approval: ${choreTitle}. Parent review is now waiting.`, 'info');
-                }
-            },
-
-            deletePendingChore(choreId) {
-                const choreIndex = this.chores.findIndex(c => c.id === choreId);
-                if (choreIndex === -1) return;
-
-                const chore = this.chores[choreIndex];
-                this.chores.splice(choreIndex, 1);
-                this.saveData();
-                this.showToast(`Deleted pending chore: ${chore.title}`, 'info');
-            },
-
-            async handleParentApproval(choreId, points) {
-                const safePoints = clampNumber(points, 0, 100000);
-                if (!choreId || safePoints <= 0) return;
-
-                const choreIndex = this.chores.findIndex(c => c.id === choreId);
-                if (choreIndex > -1) {
-                    const chore = this.chores[choreIndex];
-                    const completionDate = getDateString(new Date());
-
-                    chore.completionHistory = [...new Set([...(Array.isArray(chore.completionHistory) ? chore.completionHistory : []), completionDate])]
-                        .sort((a, b) => new Date(b) - new Date(a))
-                        .slice(0, 90);
-                    chore.streakCount = calculateChoreStreak(chore.completionHistory);
-                    chore.lastCompletedAt = Date.now();
-
-                    this.points += safePoints;
-
-                    if (chore.repeat && chore.repeat !== 'none') {
-                        chore.dueDate = getNextDueDate(chore.dueDate || completionDate, chore.repeat);
-                        chore.status = 'active';
-                        this.saveData();
-                        this.showToast(`Chore approved! +${safePoints} pts. ${chore.repeat.charAt(0).toUpperCase() + chore.repeat.slice(1)} repeat scheduled.`, 'success');
-                        return;
-                    }
-
-                    this.chores.splice(choreIndex, 1);
-                    this.saveData();
-                    this.showToast(`Chore approved! +${safePoints} pts`, 'success');
-                }
-            },
-
-            async approveChore(choreId, points) {
-                const confirmed = window.confirm('Approve this chore and award the points now?');
-                if (!confirmed) return;
-                await this.handleParentApproval(choreId, points);
-                this.updateUI();
-            },
-
-            async saveParentEmail(event) {
-                if (event) event.preventDefault();
-
-                const emailInput = document.getElementById('parent-email-input');
-                const emailValue = normalizeEmail(emailInput ? emailInput.value : '');
-
-                if (!emailValue || !emailValue.includes('@')) {
-                    this.showToast('Please enter a valid email address.', 'error');
-                    return;
-                }
-
-                this.parentEmail = emailValue;
-                this.saveData();
-                this.showToast('Parent email saved!', 'success');
-            },
-
-            sendEmailDraft(choreId) {
-                if (!this.requireParentEmail()) return;
-
-                const chore = this.chores.find(c => c.id === choreId);
-                if (!chore) return;
-
-                const url = new URL(window.location.href);
-                url.searchParams.set('approve_chore', chore.id);
-                url.searchParams.set('pts', chore.points);
-                const approvalLink = url.toString();
-
-                const subject = encodeURIComponent(`Chore Finished: ${chore.title}`);
-                const body = encodeURIComponent(`Hi!\n\nI just finished my chore: ${chore.title}.\nCan you approve it so I get my ${chore.points} points?\n\nClick here to approve: ${approvalLink}`);
-                const mailtoLink = `mailto:${this.parentEmail}?subject=${subject}&body=${body}`;
-
-                window.open(mailtoLink, '_blank');
-                this.showToast('Opening email draft...', 'info');
-            },
-
-            renderChores() {
-                const container = document.getElementById('chore-list-container');
-                if (!container) return;
-
-                if (this.chores.length === 0) {
-                    container.innerHTML = '<div class="text-center text-gray-300 py-10" id="no-chores-msg">No chores yet! Add some or ask AI for suggestions.</div>';
-                    return;
-                }
-
-                container.innerHTML = '';
-
-                this.chores.forEach(chore => {
-                    const isPending = chore.status === 'pending_approval';
-                    const el = document.createElement('div');
-                    el.className = `glass-panel p-4 rounded-xl mb-4 flex justify-between items-center animate-fade-in border-l-4 ${isPending ? 'border-orange-400 opacity-70' : 'border-yellow-400'}`;
-
-                    const safeTitle = escapeHtml(chore.title);
-                    const safePoints = escapeHtml(chore.points);
-                    const categoryLabel = escapeHtml(normalizeCategory(chore.category));
-                    const repeatText = chore.repeat && chore.repeat !== 'none' ? ` ${chore.repeat.charAt(0).toUpperCase() + chore.repeat.slice(1)}` : 'One time';
-                    const streakText = Number(chore.streakCount) > 0 ? `🔥 ${chore.streakCount}-day streak` : 'No streak yet';
-                    const historyText = Array.isArray(chore.completionHistory) && chore.completionHistory.length
-                        ? `History: ${chore.completionHistory.slice(-3).reverse().map(date => formatDisplayDate(date)).join(' • ')}`
-                        : 'Completion history will show here';
-                    const dueChip = chore.dueDate
-                        ? `<span class="text-[10px] uppercase tracking-wider bg-blue-500/20 text-blue-200 px-2 py-0.5 rounded border border-blue-400/30">${escapeHtml(formatDueDateLabel(chore.dueDate))}</span>`
-                        : '<span class="text-[10px] uppercase tracking-wider bg-gray-500/20 text-gray-200 px-2 py-0.5 rounded border border-gray-400/30">No due date</span>';
-
-                    if (isPending) {
-                        el.innerHTML = `
-                            <div class="flex-1">
-                                <h4 class="text-lg font-semibold text-gray-200 line-through">${safeTitle}</h4>
-                                <div class="flex flex-wrap items-center gap-2 mt-2">
-                                    <p class="text-sm text-yellow-300/50 font-bold">${safePoints} pts</p>
-                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded border border-orange-500/30">Pending Review</span>
-                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-slate-500/20 text-slate-200 px-2 py-0.5 rounded border border-slate-400/30">${categoryLabel}</span>
-                                    ${dueChip}
-                                </div>
-                                <p class="text-[11px] text-gray-300 mt-2">${streakText}</p>
-                                <p class="text-[11px] text-gray-400 mt-1">${escapeHtml(historyText)}</p>
-                            </div>
-                            <div class="flex gap-2 ml-2 flex-wrap md:flex-nowrap justify-end mt-2 md:mt-0">
-                                <button onclick="app.sendEmailDraft('${chore.id}')" class="glass-button bg-pink-500/30 hover:bg-pink-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center gap-2">
-                                    <i class="fas fa-envelope"></i> Send Reminder
-                                </button>
-                                <button onclick="app.deletePendingChore('${chore.id}')" class="glass-button bg-red-500/30 hover:bg-red-500/60 text-white p-2 px-4 rounded-xl flex items-center justify-center gap-2">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </div>
-                        `;
-                    } else {
-                        el.innerHTML = `
-                            <div class="flex-1">
-                                <h4 class="text-lg font-semibold">${safeTitle}</h4>
-                                <div class="flex flex-wrap items-center gap-2 mt-2">
-                                    <p class="text-sm text-yellow-300 font-bold">${safePoints} pts</p>
-                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-purple-500/20 text-purple-200 px-2 py-0.5 rounded border border-purple-400/30">${categoryLabel}</span>
-                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-200 px-2 py-0.5 rounded border border-emerald-400/30">${repeatText}</span>
-                                    ${dueChip}
-                                </div>
-                                <p class="text-[11px] text-gray-200 mt-2">${streakText}</p>
-                                <p class="text-[11px] text-gray-300 mt-1">${escapeHtml(historyText)}</p>
-                            </div>
-                            <button onclick="app.completeChore('${makeSafeJsString(chore.id)}', '${makeSafeJsString(chore.title)}', ${chore.points})" class="glass-button bg-green-500/20 hover:bg-green-500/40 text-white p-3 px-4 rounded-xl flex items-center justify-center gap-2 font-bold">
-                                <span>Submit</span>
-                                <i class="fas fa-check text-xl"></i>
-                            </button>
-                        `;
-                    }
-                    container.appendChild(el);
-                });
-            },
-
-            renderPrizes() {
-                const container = document.getElementById('available-prizes-container');
-                if (!container) return;
-                container.innerHTML = '';
-
-                const allPrizes = [...this.defaultPrizes, ...this.customPrizes];
-
-                allPrizes.forEach(prize => {
-                    const el = document.createElement('div');
-                    el.className = 'glass-panel p-6 rounded-2xl flex flex-col items-center text-center transition-transform hover:-translate-y-2 group relative overflow-hidden';
-
-                    const prizeIcon = prize.icon || 'fa-gift';
-                    const prizeColor = prize.color || 'bg-emerald-500';
-                    const canAfford = this.points >= prize.cost;
-                    const btnClass = canAfford ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : 'glass-button opacity-50 cursor-not-allowed';
-                    const safeTitle = escapeHtml(prize.title);
-                    const isCustomPrize = this.customPrizes.some(item => item.id === prize.id);
-
-                    el.innerHTML = `
-                        <div class="absolute -right-4 -top-4 w-20 h-20 ${prizeColor} rounded-full opacity-20 blur-xl group-hover:opacity-40 transition-opacity"></div>
-                        <i class="fas ${prizeIcon} text-4xl mb-4 text-white drop-shadow-lg"></i>
-                        <h4 class="text-lg font-bold mb-2 leading-tight">${safeTitle}</h4>
-                        <div class="mt-auto w-full pt-4">
-                            <p class="text-yellow-300 font-bold mb-3">${prize.cost} pts</p>
-                            <button ${!canAfford ? 'disabled' : ''} onclick="app.redeemPrize('${prize.id}')" class="w-full py-2 rounded-xl font-bold transition-all ${btnClass}">
-                                ${canAfford ? 'Redeem' : 'Need more pts'}
-                            </button>
-                            ${isCustomPrize ? `<button onclick="app.removeCustomPrize('${prize.id}')" class="w-full mt-3 py-2 rounded-xl font-bold transition-all bg-red-500/30 hover:bg-red-500/50 text-white">Remove</button>` : ''}
-                        </div>
-                    `;
-                    container.appendChild(el);
-                });
-            },
-
-            async redeemPrize(prizeId) {
-                const allPrizes = [...this.defaultPrizes, ...this.customPrizes];
-                const prize = allPrizes.find(p => p.id === prizeId);
-                if (!prize) return;
-
-                if (this.points < prize.cost) {
-                    this.showToast('Not enough points!', 'error');
-                    return;
-                }
-
-                this.points -= prize.cost;
-                this.redeemedPrizes.unshift({
-                    title: prize.title,
-                    icon: prize.icon || 'fa-gift',
-                    cost: prize.cost,
-                    timestamp: Date.now()
-                });
-
-                this.saveData();
-                this.showToast(`Redeemed ${prize.title}! 🎉`, 'success');
-            },
-
-            renderRedeemedPrizes() {
-                const container = document.getElementById('redeemed-prizes-container');
-                if (!container) return;
-
-                if (this.redeemedPrizes.length === 0) {
-                    container.innerHTML = '<p class="text-gray-300 col-span-full">No prizes redeemed yet. Start doing chores!</p>';
-                    return;
-                }
-
-                container.innerHTML = '';
-                this.redeemedPrizes.forEach(prize => {
-                    const date = new Date(prize.timestamp).toLocaleDateString();
-                    const el = document.createElement('div');
-                    el.className = 'glass-panel p-4 rounded-xl flex items-center gap-4 opacity-80';
-                    el.innerHTML = `
-                        <div class="w-12 h-12 rounded-full glass flex items-center justify-center">
-                            <i class="fas ${prize.icon} text-xl text-yellow-300"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-sm">${escapeHtml(prize.title)}</h4>
-                            <p class="text-xs text-gray-300">Redeemed: ${date}</p>
-                        </div>
-                    `;
-                    container.appendChild(el);
-                });
-            },
-
-            async suggestChores() {
-                const btn = document.getElementById('btn-suggest-chores');
-                if (!btn) return;
-
-                btn.innerHTML = '<div class="loader w-5 h-5 border-2"></div> <span>Generating...</span>';
-                btn.disabled = true;
-
-                try {
-                    await new Promise(r => setTimeout(r, 1200));
-                    const suggestions = this.getRandomizedSuggestions(3);
-                    this.pendingSuggestions = suggestions;
-                    this.renderSuggestionPreview(suggestions);
-                    this.showToast('Review the suggestions and confirm to add them.', 'info');
-                } catch (error) {
-                    console.error('Error:', error);
-                    this.showToast('Failed to generate chores.', 'error');
-                } finally {
-                    btn.innerHTML = '<span>Suggest Fun Chores</span>';
-                    btn.disabled = false;
-                }
-            },
-
-            showToast(message, type = 'info') {
-                const container = document.getElementById('toast-container');
-                if (!container) return;
-
-                const toast = document.createElement('div');
-                const icon = type === 'success' ? 'fa-check-circle text-green-400' : (type === 'error' ? 'fa-exclamation-circle text-red-400' : 'fa-info-circle text-blue-400');
-
-                toast.className = `glass-panel px-6 py-4 rounded-xl flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300 shadow-xl border-t border-l border-white/10`;
-                toast.innerHTML = `<i class="fas ${icon} text-xl"></i> <span class="font-semibold">${escapeHtml(message)}</span>`;
-
-                container.appendChild(toast);
-
-                setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
-                setTimeout(() => {
-                    toast.classList.add('opacity-0', 'translate-x-10');
-                    setTimeout(() => toast.remove(), 300);
-                }, 3000);
-            }
+            ]
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            window.app.init();
-        });
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function sanitizeText(value, maxLength = 80) {
+            if (value === null || value === undefined) return '';
+            return String(value).replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, maxLength);
+        }
+
+        function normalizeEmail(value) {
+            return String(value || '').trim().toLowerCase();
+        }
+
+        function clampNumber(value, min, max) {
+            const num = Number(value);
+            if (!Number.isFinite(num)) return min;
+            return Math.max(min, Math.min(max, num));
+        }
+
+        function getDateString(value) {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toISOString().split('T')[0];
+        }
+
+        function normalizeCategory(value) {
+            const allowed = ['General', 'Cleaning', 'Kitchen', 'Outside', 'Laundry', 'Bathroom', 'Bedroom', 'Pets'];
+            const candidate = sanitizeText(value || '', 30);
+            return allowed.includes(candidate) ? candidate : 'General';
+        }
+
+        function normalizeRepeat(value) {
+            const candidate = sanitizeText(value || '', 20).toLowerCase();
+            return ['daily', 'weekly', 'monthly'].includes(candidate) ? candidate : 'none';
+        }
+
+        function getDateLabel(dateString) {
+            if (!dateString) return 'No due date';
+            const date = new Date(dateString + 'T12:00:00');
+            if (Number.isNaN(date.getTime())) return 'No due date';
+            return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+
+        function getDueLabel(dateString) {
+            if (!dateString) return 'No due date';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dueDate = new Date(dateString + 'T12:00:00');
+            dueDate.setHours(0, 0, 0, 0);
+            const diffDays = Math.round((dueDate - today) / 86400000);
+
+            if (diffDays === 0) return 'Due today';
+            if (diffDays === 1) return 'Due tomorrow';
+            if (diffDays < 0) return `${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? '' : 's'} overdue`;
+            return `Due in ${diffDays} days`;
+        }
+
+        function getActiveProfile() {
+            return app.profiles.find(p => p.id === app.activeProfileId) || app.profiles[0] || null;
+        }
+
+        function syncActiveProfileState() {
+            const profile = getActiveProfile();
+            if (!profile) {
+                app.points = 0;
+                app.parentEmail = null;
+                app.chores = [];
+                app.redeemedPrizes = [];
+                app.customPrizes = [];
+                return;
+            }
+
+            app.points = clampNumber(profile.points || 0, 0, 100000);
+            app.parentEmail = normalizeEmail(profile.parentEmail || null);
+            app.chores = Array.isArray(profile.chores) ? profile.chores : [];
+            app.redeemedPrizes = Array.isArray(profile.redeemedPrizes) ? profile.redeemedPrizes : [];
+            app.customPrizes = Array.isArray(profile.customPrizes) ? profile.customPrizes : [];
+        }
+
+        function ensureDefaultProfile() {
+            if (app.profiles.length) return;
+            const id = `profile_${Date.now()}`;
+            app.profiles.push({
+                id,
+                name: 'Kid 1',
+                color: DEFAULT_COLORS[0],
+                points: 0,
+                parentEmail: null,
+                chores: [],
+                redeemedPrizes: [],
+                customPrizes: []
+            });
+            app.activeProfileId = id;
+            syncActiveProfileState();
+        }
+
+        function loadData() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+                if (saved && Array.isArray(saved.profiles) && saved.profiles.length) {
+                    app.profiles = saved.profiles.map((profile, index) => ({
+                        id: profile.id || `profile_${Date.now()}_${index}`,
+                        name: sanitizeText(profile.name, 30) || `Kid ${index + 1}`,
+                        color: DEFAULT_COLORS[index % DEFAULT_COLORS.length],
+                        points: clampNumber(profile.points || 0, 0, 100000),
+                        parentEmail: normalizeEmail(profile.parentEmail || null),
+                        chores: Array.isArray(profile.chores) ? profile.chores : [],
+                        redeemedPrizes: Array.isArray(profile.redeemedPrizes) ? profile.redeemedPrizes : [],
+                        customPrizes: Array.isArray(profile.customPrizes) ? profile.customPrizes : []
+                    }));
+                    app.activeProfileId = saved.activeProfileId || app.profiles[0].id;
+                    syncActiveProfileState();
+                } else if (saved && typeof saved === 'object') {
+                    const legacy = {
+                        points: clampNumber(saved.points || 0, 0, 100000),
+                        parentEmail: normalizeEmail(saved.parentEmail || null),
+                        chores: Array.isArray(saved.chores) ? saved.chores : [],
+                        redeemedPrizes: Array.isArray(saved.redeemedPrizes) ? saved.redeemedPrizes : [],
+                        customPrizes: Array.isArray(saved.customPrizes) ? saved.customPrizes : []
+                    };
+                    app.profiles = [{
+                        id: `profile_${Date.now()}`,
+                        name: 'Kid 1',
+                        color: DEFAULT_COLORS[0],
+                        points: legacy.points,
+                        parentEmail: legacy.parentEmail,
+                        chores: legacy.chores,
+                        redeemedPrizes: legacy.redeemedPrizes,
+                        customPrizes: legacy.customPrizes
+                    }];
+                    app.activeProfileId = app.profiles[0].id;
+                    syncActiveProfileState();
+                } else {
+                    ensureDefaultProfile();
+                }
+            } catch (error) {
+                console.warn('Could not parse stored data; resetting.', error);
+                ensureDefaultProfile();
+            }
+
+            const active = getActiveProfile();
+            if (active) {
+                app.points = clampNumber(active.points || 0, 0, 100000);
+                app.parentEmail = normalizeEmail(active.parentEmail || null);
+                app.chores = Array.isArray(active.chores) ? active.chores : [];
+                app.redeemedPrizes = Array.isArray(active.redeemedPrizes) ? active.redeemedPrizes : [];
+                app.customPrizes = Array.isArray(active.customPrizes) ? active.customPrizes : [];
+            }
+
+            const parentInput = document.getElementById('parent-email-input');
+            if (parentInput) parentInput.value = app.parentEmail || '';
+            updateUI();
+        }
+
+        function saveData() {
+            ensureDefaultProfile();
+            const active = getActiveProfile();
+            if (!active) return;
+
+            active.name = sanitizeText(active.name, 30) || 'Kid';
+            active.color = sanitizeText(active.color, 50) || DEFAULT_COLORS[0];
+            active.points = clampNumber(app.points || 0, 0, 100000);
+            active.parentEmail = normalizeEmail(app.parentEmail || null);
+            active.chores = Array.isArray(app.chores) ? app.chores : [];
+            active.redeemedPrizes = Array.isArray(app.redeemedPrizes) ? app.redeemedPrizes : [];
+            active.customPrizes = Array.isArray(app.customPrizes) ? app.customPrizes : [];
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                profiles: app.profiles,
+                activeProfileId: app.activeProfileId
+            }));
+
+            updateUI();
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-emerald-500/80 border-emerald-300',
+                error: 'bg-red-500/80 border-red-300',
+                info: 'bg-blue-500/80 border-blue-300'
+            };
+
+            toast.className = `border rounded-xl px-4 py-3 shadow-lg text-sm font-semibold ${colors[type] || colors.info}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 2200);
+        }
+
+        function renderProfiles() {
+            const profileTabs = document.getElementById('profile-tabs');
+            const profileList = document.getElementById('profile-list');
+            const nameEl = document.getElementById('active-profile-name');
+
+            if (nameEl) {
+                const active = getActiveProfile();
+                nameEl.textContent = active ? active.name : 'Kid 1';
+            }
+
+            if (profileTabs) {
+                profileTabs.innerHTML = app.profiles.map((profile) => {
+                    const isActive = profile.id === app.activeProfileId;
+                    return `
+                        <button type="button" data-profile-id="${profile.id}" class="flex items-center gap-2 rounded-full px-4 py-2 ${isActive ? 'bg-white/25 ring-2 ring-yellow-200' : 'bg-white/10'} border border-white/20 text-sm font-semibold">
+                            <span class="w-7 h-7 rounded-full ${profile.color || DEFAULT_COLORS[0]} text-gray-800 flex items-center justify-center font-bold text-xs">${escapeHtml((profile.name || 'K').charAt(0).toUpperCase())}</span>
+                            <span>${escapeHtml(profile.name || 'Kid')}</span>
+                        </button>
+                    `;
+                }).join('');
+
+                profileTabs.querySelectorAll('[data-profile-id]').forEach(button => {
+                    button.addEventListener('click', () => {
+                        app.activeProfileId = button.getAttribute('data-profile-id');
+                        syncActiveProfileState();
+                        saveData();
+                    });
+                });
+            }
+
+            if (profileList) {
+                profileList.innerHTML = app.profiles.map((profile) => {
+                    const isActive = profile.id === app.activeProfileId;
+                    const removeButton = app.profiles.length > 1 ? `<button type="button" data-remove-profile-id="${profile.id}" class="text-red-200 hover:text-white"><i class="fas fa-trash"></i></button>` : '';
+                    return `
+                        <div class="flex items-center gap-3 rounded-xl bg-white/10 p-3 ${isActive ? 'ring-2 ring-yellow-300' : ''}">
+                            <button type="button" data-profile-id="${profile.id}" class="flex-1 flex items-center gap-3 text-left">
+                                <span class="w-8 h-8 rounded-full ${profile.color || DEFAULT_COLORS[0]} flex items-center justify-center text-gray-800 font-bold">${escapeHtml((profile.name || 'K').charAt(0).toUpperCase())}</span>
+                                <span class="flex-1 font-semibold">${escapeHtml(profile.name || 'Kid')}</span>
+                                <span class="text-xs text-yellow-200">${profile.points || 0} pts</span>
+                            </button>
+                            ${removeButton}
+                        </div>
+                    `;
+                }).join('');
+
+                profileList.querySelectorAll('[data-profile-id]').forEach(button => {
+                    button.addEventListener('click', () => {
+                        app.activeProfileId = button.getAttribute('data-profile-id');
+                        syncActiveProfileState();
+                        saveData();
+                    });
+                });
+
+                profileList.querySelectorAll('[data-remove-profile-id]').forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        app.deleteChildProfile(button.getAttribute('data-remove-profile-id'));
+                    });
+                });
+            }
+        }
+
+        function updateUI() {
+            renderProfiles();
+            document.getElementById('home-points-display').textContent = app.points;
+            document.getElementById('chores-points-display').textContent = `${app.points} pts`;
+            document.getElementById('prizes-points-display').textContent = app.points;
+            renderChores();
+            renderPrizes();
+            renderRedeemedPrizes();
+            renderStats();
+        }
+
+        function renderStats() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const dueSoon = app.chores.filter(chore => chore.status !== 'pending_approval' && chore.dueDate).filter(chore => {
+                const due = new Date(chore.dueDate + 'T12:00:00');
+                due.setHours(0, 0, 0, 0);
+                const diffDays = Math.round((due - today) / 86400000);
+                return diffDays >= 0 && diffDays <= 7;
+            }).length;
+
+            const recurring = app.chores.filter(chore => chore.repeat && chore.repeat !== 'none').length;
+            const bestStreak = app.chores.reduce((highest, chore) => Math.max(highest, Number(chore.streakCount) || 0), 0);
+
+            document.getElementById('stats-due-soon').textContent = dueSoon;
+            document.getElementById('stats-recurring').textContent = recurring;
+            document.getElementById('stats-best-streak').textContent = `${bestStreak} day${bestStreak === 1 ? '' : 's'}`;
+        }
+
+        function renderChores() {
+            const container = document.getElementById('chore-list-container');
+            if (!container) return;
+
+            if (!app.chores.length) {
+                container.innerHTML = '<div class="text-center text-gray-300 py-10">No chores yet! Add some or ask AI for suggestions.</div>';
+                return;
+            }
+
+            container.innerHTML = app.chores.map(chore => {
+                const statusText = chore.status === 'pending_approval' ? 'Pending parent approval' : 'Ready to complete';
+                return `
+                    <div class="rounded-2xl border border-white/15 bg-white/5 p-4 mb-4">
+                        <div class="flex justify-between gap-3 items-start">
+                            <div>
+                                <div class="text-xs uppercase tracking-[0.18em] text-yellow-200 mb-2">${escapeHtml(chore.category || 'General')}</div>
+                                <h4 class="text-xl font-bold">${escapeHtml(chore.title)}</h4>
+                            </div>
+                            <span class="rounded-full bg-yellow-400/20 px-3 py-1 border border-yellow-300/40 text-yellow-200 font-bold">${chore.points} pts</span>
+                        </div>
+                        <div class="mt-3 flex flex-wrap gap-3 text-sm text-gray-200">
+                            <span><i class="far fa-calendar mr-1"></i> ${getDateLabel(chore.dueDate)}</span>
+                            <span><i class="fas fa-repeat mr-1"></i> ${chore.repeat === 'none' ? 'One time' : chore.repeat}</span>
+                            <span><i class="fas fa-hourglass-half mr-1"></i> ${statusText}</span>
+                        </div>
+                        <div class="mt-4 flex items-center justify-between gap-3">
+                            <div class="text-xs text-gray-300">${getDueLabel(chore.dueDate)}</div>
+                            <div class="flex gap-2">
+                                ${chore.status === 'pending_approval'
+                                    ? `<button type="button" data-action="delete-pending" data-id="${chore.id}" class="bg-red-500/25 border border-red-300/40 text-red-100 rounded-lg px-3 py-2 text-sm font-semibold">Delete</button>`
+                                    : `<button type="button" data-action="complete" data-id="${chore.id}" data-title="${escapeHtml(chore.title)}" data-points="${chore.points}" class="bg-green-500/25 border border-green-300/40 text-green-100 rounded-lg px-3 py-2 text-sm font-semibold">Finish & Send Request</button>`}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.querySelectorAll('[data-action]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const action = button.getAttribute('data-action');
+                    const id = button.getAttribute('data-id');
+                    if (action === 'complete') {
+                        app.completeChore(id, button.getAttribute('data-title'), Number(button.getAttribute('data-points')) || 0);
+                    }
+                    if (action === 'delete-pending') {
+                        app.deletePendingChore(id);
+                    }
+                });
+            });
+        }
+
+        function renderPrizes() {
+            const container = document.getElementById('available-prizes-container');
+            if (!container) return;
+
+            const items = [...app.defaultPrizes, ...app.customPrizes];
+            container.innerHTML = items.map(prize => {
+                const cost = prize.cost || 0;
+                return `
+                    <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 rounded-xl ${prize.color || 'bg-emerald-500'} flex items-center justify-center text-xl text-white">
+                                <i class="fas ${prize.icon || 'fa-gift'}"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg">${escapeHtml(prize.title)}</h4>
+                                <p class="text-sm text-gray-200">${cost} pts</p>
+                            </div>
+                        </div>
+                        <button type="button" data-prize-id="${prize.id}" class="w-full rounded-xl bg-yellow-400/20 border border-yellow-300/40 py-2 text-yellow-100 font-bold hover:bg-yellow-400/30">
+                            Redeem
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            container.querySelectorAll('[data-prize-id]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const prizeId = button.getAttribute('data-prize-id');
+                    const prize = [...app.defaultPrizes, ...app.customPrizes].find(item => item.id === prizeId);
+                    if (!prize) return;
+                    app.redeemPrize(prize);
+                });
+            });
+        }
+
+        function renderRedeemedPrizes() {
+            const container = document.getElementById('redeemed-prizes-container');
+            if (!container) return;
+
+            if (!app.redeemedPrizes.length) {
+                container.innerHTML = '<div class="text-gray-300 text-sm">No redeemed prizes yet.</div>';
+                return;
+            }
+
+            container.innerHTML = app.redeemedPrizes.map((prize) => `
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl ${prize.color || 'bg-emerald-500'} flex items-center justify-center">
+                            <i class="fas ${prize.icon || 'fa-gift'} text-white"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">${escapeHtml(prize.title)}</h4>
+                            <p class="text-xs text-gray-300">${prize.cost || 0} pts</p>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-300">Redeemed on ${new Date(prize.timestamp || Date.now()).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function addChore() {
+            const titleInput = document.getElementById('new-chore-title');
+            const pointsInput = document.getElementById('new-chore-points');
+            const categoryInput = document.getElementById('new-chore-category');
+            const dueDateInput = document.getElementById('new-chore-due-date');
+            const repeatInput = document.getElementById('new-chore-repeat');
+
+            const title = sanitizeText(titleInput ? titleInput.value : '', 120);
+            const points = clampNumber(pointsInput ? Number(pointsInput.value) : 0, 0, 5000);
+            const category = normalizeCategory(categoryInput ? categoryInput.value : 'General');
+            const dueDate = dueDateInput ? getDateString(dueDateInput.value) : '';
+            const repeat = normalizeRepeat(repeatInput ? repeatInput.value : 'none');
+
+            if (!title || points <= 0) {
+                showToast('Please enter a chore and a valid point value.', 'error');
+                return;
+            }
+
+            app.chores.unshift({
+                id: `chore_${Date.now()}`,
+                title,
+                points,
+                category,
+                dueDate,
+                repeat,
+                status: 'active',
+                completionHistory: [],
+                streakCount: 0,
+                lastCompletedAt: null,
+                timestamp: Date.now()
+            });
+
+            if (titleInput) titleInput.value = '';
+            if (pointsInput) pointsInput.value = '';
+            if (categoryInput) categoryInput.value = 'General';
+            if (dueDateInput) dueDateInput.value = '';
+            if (repeatInput) repeatInput.value = 'none';
+
+            saveData();
+            showToast(`Added chore: ${title}`, 'success');
+        }
+
+        function addPrize() {
+            const titleInput = document.getElementById('new-prize-title');
+            const costInput = document.getElementById('new-prize-cost');
+
+            const title = sanitizeText(titleInput ? titleInput.value : '', 120);
+            const cost = clampNumber(costInput ? Number(costInput.value) : 0, 0, 100000);
+
+            if (!title || cost <= 0) {
+                showToast('Please enter a prize name and cost.', 'error');
+                return;
+            }
+
+            app.customPrizes.unshift({
+                id: `custom_prize_${Date.now()}`,
+                title,
+                cost,
+                icon: 'fa-gift',
+                color: 'bg-emerald-500'
+            });
+
+            if (titleInput) titleInput.value = '';
+            if (costInput) costInput.value = '';
+
+            saveData();
+            showToast(`Added prize: ${title}`, 'success');
+        }
+
+        function redeemPrize(prize) {
+            if (!prize) return;
+            if (app.points < Number(prize.cost || 0)) {
+                showToast('Not enough points for that reward yet.', 'info');
+                return;
+            }
+
+            const confirmed = window.confirm(`Redeem "${prize.title}" for ${prize.cost} points?`);
+            if (!confirmed) return;
+
+            app.points -= Number(prize.cost || 0);
+            app.redeemedPrizes.unshift({
+                ...prize,
+                timestamp: Date.now()
+            });
+            saveData();
+            showToast(`${prize.title} redeemed!`, 'success');
+        }
+
+        function completeChore(choreId, title, points) {
+            if (!app.parentEmail) {
+                const settings = document.getElementById('view-etc');
+                settings && settings.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                document.getElementById('parent-email-input')?.focus();
+                showToast('Save a parent email before submitting a chore for approval.', 'info');
+                return;
+            }
+
+            const confirmed = window.confirm(`Submit "${title}" for approval and send a request for ${points} points?`);
+            if (!confirmed) return;
+
+            const choreIndex = app.chores.findIndex(chore => chore.id === choreId);
+            if (choreIndex === -1) return;
+
+            app.chores[choreIndex].status = 'pending_approval';
+            saveData();
+            showToast(`Submitted for approval: ${title}`, 'info');
+        }
+
+        function deletePendingChore(choreId) {
+            const choreIndex = app.chores.findIndex(chore => chore.id === choreId);
+            if (choreIndex === -1) return;
+            const chore = app.chores[choreIndex];
+            app.chores.splice(choreIndex, 1);
+            saveData();
+            showToast(`Deleted pending chore: ${chore.title}`, 'info');
+        }
+
+        function handleParentApproval(choreId, points) {
+            if (!choreId || !points || Number(points) <= 0) return;
+            const choreIndex = app.chores.findIndex(chore => chore.id === choreId);
+            if (choreIndex === -1) return;
+
+            const chore = app.chores[choreIndex];
+            app.chores.splice(choreIndex, 1);
+            app.points += Number(points);
+            saveData();
+            showToast(`Approved: ${chore.title} +${points} pts`, 'success');
+        }
+
+        function saveParentEmail(event) {
+            if (event) event.preventDefault();
+            const input = document.getElementById('parent-email-input');
+            const email = normalizeEmail(input ? input.value : '');
+            if (!email || !email.includes('@')) {
+                showToast('Please enter a valid parent email.', 'error');
+                return;
+            }
+            app.parentEmail = email;
+            saveData();
+            document.getElementById('onboarding-email-input') && (document.getElementById('onboarding-email-input').value = email);
+            showToast('Parent email saved.', 'success');
+        }
+
+        function submitInitialParentEmail(event) {
+            if (event) event.preventDefault();
+            const input = document.getElementById('onboarding-email-input');
+            const email = normalizeEmail(input ? input.value : '');
+            if (!email || !email.includes('@')) {
+                showToast('Please enter a valid email address.', 'error');
+                return;
+            }
+            app.parentEmail = email;
+            const parentInput = document.getElementById('parent-email-input');
+            if (parentInput) parentInput.value = email;
+            const modal = document.getElementById('email-onboarding-modal');
+            if (modal) modal.classList.add('hidden');
+            saveData();
+            showToast('You are all set.', 'success');
+        }
+
+        function addChildProfile(event) {
+            if (event) event.preventDefault();
+            const input = document.getElementById('new-child-name');
+            const name = sanitizeText(input ? input.value : '', 30);
+            if (!name) {
+                showToast('Enter a child name first.', 'error');
+                return;
+            }
+
+            const profile = {
+                id: `profile_${Date.now()}`,
+                name,
+                color: DEFAULT_COLORS[app.profiles.length % DEFAULT_COLORS.length],
+                points: 0,
+                parentEmail: null,
+                chores: [],
+                redeemedPrizes: [],
+                customPrizes: []
+            };
+
+            app.profiles.push(profile);
+            app.activeProfileId = profile.id;
+            syncActiveProfileState();
+            saveData();
+            if (input) input.value = '';
+            showToast(`${name} profile added.`, 'success');
+        }
+
+        function deleteChildProfile(profileId) {
+            if (app.profiles.length <= 1) {
+                showToast('You need at least one child profile.', 'info');
+                return;
+            }
+
+            const target = app.profiles.find(profile => profile.id === profileId);
+            if (!target) return;
+
+            const confirmed = window.confirm(`Delete profile "${target.name}"?`);
+            if (!confirmed) return;
+
+            app.profiles = app.profiles.filter(profile => profile.id !== profileId);
+            app.activeProfileId = app.profiles[0].id;
+            syncActiveProfileState();
+            saveData();
+            showToast(`${target.name} was removed.`, 'info');
+        }
+
+        function addSuggestedBatch() {
+            const suggestions = [
+                { title: 'Make the Bed', points: 15 },
+                { title: 'Put Away Toys', points: 20 },
+                { title: 'Sweep the Porch', points: 18 },
+                { title: 'Water the Plants', points: 12 },
+                { title: 'Feed the Pets', points: 10 }
+            ];
+
+            suggestions.forEach(item => {
+                app.chores.unshift({
+                    id: `chore_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                    title: item.title,
+                    points: item.points,
+                    category: 'General',
+                    dueDate: '',
+                    repeat: 'none',
+                    status: 'active',
+                    completionHistory: [],
+                    streakCount: 0,
+                    lastCompletedAt: null,
+                    timestamp: Date.now()
+                });
+            });
+
+            saveData();
+            showToast('A fun chore pack was added.', 'success');
+        }
+
+        function init() {
+            loadData();
+
+            const params = new URLSearchParams(window.location.search);
+            const choreId = params.get('approve_chore');
+            const pts = Number(params.get('pts'));
+            if (choreId && Number.isFinite(pts) && pts > 0) {
+                handleParentApproval(choreId, pts);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            setTimeout(() => {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) overlay.style.display = 'none';
+                if (!app.parentEmail) {
+                    const modal = document.getElementById('email-onboarding-modal');
+                    if (modal) modal.classList.remove('hidden');
+                }
+            }, 700);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
