@@ -14,6 +14,9 @@
             --bg-4: #23d5ab;
         }
 
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -51,6 +54,7 @@
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.4);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .glass-button:hover {
@@ -66,6 +70,7 @@
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
+            width: 100%;
         }
 
         .glass-input::placeholder {
@@ -130,21 +135,6 @@
             gap: 0.75rem;
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
         .logo-bounce {
             animation: bounce 2s infinite ease-in-out;
         }
@@ -193,10 +183,10 @@
         </div>
 
         <nav class="hidden md:flex gap-6">
-            <button onclick="app.scrollToSection('view-home')" class="hover:text-yellow-300 font-semibold transition-colors">Home</button>
-            <button onclick="app.scrollToSection('view-chores')" class="hover:text-yellow-300 font-semibold transition-colors">Chores</button>
-            <button onclick="app.scrollToSection('view-prizes')" class="hover:text-yellow-300 font-semibold transition-colors">Prizes</button>
-            <button onclick="app.scrollToSection('view-etc')" class="hover:text-yellow-300 font-semibold transition-colors">Settings</button>
+            <button type="button" onclick="app.scrollToSection('view-home')" class="hover:text-yellow-300 font-semibold transition-colors">Home</button>
+            <button type="button" onclick="app.scrollToSection('view-chores')" class="hover:text-yellow-300 font-semibold transition-colors">Chores</button>
+            <button type="button" onclick="app.scrollToSection('view-prizes')" class="hover:text-yellow-300 font-semibold transition-colors">Prizes</button>
+            <button type="button" onclick="app.scrollToSection('view-etc')" class="hover:text-yellow-300 font-semibold transition-colors">Settings</button>
         </nav>
 
         <div class="flex items-center gap-4">
@@ -205,8 +195,8 @@
                 <p class="font-semibold text-xs text-green-300">Ready</p>
             </div>
             <div class="md:hidden flex gap-4 text-xl">
-                <button onclick="app.scrollToSection('view-chores')"><i class="fas fa-clipboard-list"></i></button>
-                <button onclick="app.scrollToSection('view-prizes')"><i class="fas fa-gift"></i></button>
+                <button type="button" onclick="app.scrollToSection('view-chores')"><i class="fas fa-clipboard-list"></i></button>
+                <button type="button" onclick="app.scrollToSection('view-prizes')"><i class="fas fa-gift"></i></button>
             </div>
         </div>
     </header>
@@ -254,6 +244,21 @@
             <div class="mb-8">
                 <p class="text-xs uppercase tracking-[0.2em] text-gray-200 mb-3">Current child</p>
                 <div id="profile-tabs" class="flex flex-wrap gap-3"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="glass-panel p-4 rounded-2xl text-center">
+                    <div class="text-xs uppercase tracking-wider text-gray-300">Due Soon</div>
+                    <div id="stats-due-soon" class="text-2xl font-bold">0</div>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl text-center">
+                    <div class="text-xs uppercase tracking-wider text-gray-300">Recurring</div>
+                    <div id="stats-recurring" class="text-2xl font-bold">0</div>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl text-center">
+                    <div class="text-xs uppercase tracking-wider text-gray-300">Best Streak</div>
+                    <div id="stats-best-streak" class="text-2xl font-bold">0 days</div>
+                </div>
             </div>
 
             <div class="flex-1 flex flex-col items-center justify-center opacity-80 mt-4">
@@ -451,7 +456,221 @@
                 { title: 'Vacuum the Car Seats', points: 28 },
                 { title: 'Straighten the Bookshelf', points: 20 },
                 { title: 'Clean the Front Entryway', points: 18 }
-            ]
+            ],
+
+            scrollToSection(sectionId) {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            },
+
+            addSuggestedBatch() {
+                const picks = [...this.choreSuggestionPool].sort(() => Math.random() - 0.5).slice(0, 4);
+                picks.forEach(item => {
+                    this.chores.unshift({
+                        id: `chore_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                        title: item.title,
+                        points: item.points,
+                        category: 'General',
+                        dueDate: '',
+                        repeat: 'none',
+                        status: 'active',
+                        completionHistory: [],
+                        streakCount: 0,
+                        lastCompletedAt: null,
+                        timestamp: Date.now()
+                    });
+                });
+                saveData();
+                showToast('Added a fun chore pack!', 'success');
+            },
+
+            submitInitialParentEmail(event) {
+                if (event) event.preventDefault();
+                const input = document.getElementById('onboarding-email-input');
+                const email = normalizeEmail(input ? input.value : '');
+                if (!email || !email.includes('@')) {
+                    showToast('Please enter a valid parent email.', 'error');
+                    return;
+                }
+
+                this.parentEmail = email;
+                const modal = document.getElementById('email-onboarding-modal');
+                if (modal) modal.classList.add('hidden');
+                saveData();
+                showToast('Parent email saved.', 'success');
+            },
+
+            saveParentEmail(event) {
+                if (event) event.preventDefault();
+                const input = document.getElementById('parent-email-input');
+                const email = normalizeEmail(input ? input.value : '');
+                if (!email || !email.includes('@')) {
+                    showToast('Please enter a valid parent email.', 'error');
+                    return;
+                }
+                this.parentEmail = email;
+                saveData();
+                showToast('Parent email saved.', 'success');
+            },
+
+            addChildProfile(event) {
+                if (event) event.preventDefault();
+                const input = document.getElementById('new-child-name');
+                const name = sanitizeText(input ? input.value : '', 30);
+                if (!name) {
+                    showToast('Enter a child name first.', 'error');
+                    return;
+                }
+
+                const newProfile = {
+                    id: `profile_${Date.now()}`,
+                    name,
+                    color: DEFAULT_COLORS[(this.profiles.length + 1) % DEFAULT_COLORS.length],
+                    points: 0,
+                    parentEmail: null,
+                    chores: [],
+                    redeemedPrizes: [],
+                    customPrizes: []
+                };
+
+                this.profiles.push(newProfile);
+                this.activeProfileId = newProfile.id;
+                syncActiveProfileState();
+                saveData();
+                if (input) input.value = '';
+                showToast(`Added child profile: ${name}`, 'success');
+            },
+
+            deleteChildProfile(profileId) {
+                if (!profileId) return;
+                if (this.profiles.length <= 1) {
+                    showToast('You need at least one child profile.', 'info');
+                    return;
+                }
+                const index = this.profiles.findIndex(p => p.id === profileId);
+                if (index === -1) return;
+                this.profiles.splice(index, 1);
+                this.activeProfileId = this.profiles[0].id;
+                syncActiveProfileState();
+                saveData();
+                showToast('Profile removed.', 'info');
+            },
+
+            addChore() {
+                const titleInput = document.getElementById('new-chore-title');
+                const pointsInput = document.getElementById('new-chore-points');
+                const categoryInput = document.getElementById('new-chore-category');
+                const dueDateInput = document.getElementById('new-chore-due-date');
+                const repeatInput = document.getElementById('new-chore-repeat');
+
+                const title = sanitizeText(titleInput ? titleInput.value : '', 120);
+                const points = clampNumber(pointsInput ? Number(pointsInput.value) : 0, 0, 5000);
+                const category = normalizeCategory(categoryInput ? categoryInput.value : 'General');
+                const dueDate = dueDateInput ? getDateString(dueDateInput.value) : '';
+                const repeat = normalizeRepeat(repeatInput ? repeatInput.value : 'none');
+
+                if (!title || points <= 0) {
+                    showToast('Please enter a chore and a valid point value.', 'error');
+                    return;
+                }
+
+                this.chores.unshift({
+                    id: `chore_${Date.now()}`,
+                    title,
+                    points,
+                    category,
+                    dueDate,
+                    repeat,
+                    status: 'active',
+                    completionHistory: [],
+                    streakCount: 0,
+                    lastCompletedAt: null,
+                    timestamp: Date.now()
+                });
+
+                if (titleInput) titleInput.value = '';
+                if (pointsInput) pointsInput.value = '';
+                if (categoryInput) categoryInput.value = 'General';
+                if (dueDateInput) dueDateInput.value = '';
+                if (repeatInput) repeatInput.value = 'none';
+
+                saveData();
+                showToast(`Added chore: ${title}`, 'success');
+            },
+
+            addPrize() {
+                const titleInput = document.getElementById('new-prize-title');
+                const costInput = document.getElementById('new-prize-cost');
+                const title = sanitizeText(titleInput ? titleInput.value : '', 120);
+                const cost = clampNumber(costInput ? Number(costInput.value) : 0, 0, 100000);
+
+                if (!title || cost <= 0) {
+                    showToast('Please enter a prize name and cost.', 'error');
+                    return;
+                }
+
+                this.customPrizes.unshift({
+                    id: `custom_prize_${Date.now()}`,
+                    title,
+                    cost,
+                    icon: 'fa-gift',
+                    color: 'bg-emerald-500'
+                });
+
+                if (titleInput) titleInput.value = '';
+                if (costInput) costInput.value = '';
+
+                saveData();
+                showToast(`Added prize: ${title}`, 'success');
+            },
+
+            redeemPrize(prize) {
+                if (!prize) return;
+                if (this.points < Number(prize.cost || 0)) {
+                    showToast('Not enough points for that reward yet.', 'info');
+                    return;
+                }
+
+                const confirmed = window.confirm(`Redeem "${prize.title}" for ${prize.cost} points?`);
+                if (!confirmed) return;
+
+                this.points -= Number(prize.cost || 0);
+                this.redeemedPrizes.unshift({ ...prize, timestamp: Date.now() });
+                saveData();
+                showToast(`${prize.title} redeemed!`, 'success');
+            },
+
+            completeChore(choreId, title, points) {
+                if (!this.parentEmail) {
+                    const settings = document.getElementById('view-etc');
+                    if (settings) settings.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const parentInput = document.getElementById('parent-email-input');
+                    if (parentInput) parentInput.focus();
+                    showToast('Save a parent email before submitting a chore for approval.', 'info');
+                    return;
+                }
+
+                const confirmed = window.confirm(`Submit "${title}" for approval and send a request for ${points} points?`);
+                if (!confirmed) return;
+
+                const choreIndex = this.chores.findIndex(chore => chore.id === choreId);
+                if (choreIndex === -1) return;
+
+                this.chores[choreIndex].status = 'pending_approval';
+                saveData();
+                showToast(`Submitted for approval: ${title}`, 'info');
+            },
+
+            deletePendingChore(choreId) {
+                const choreIndex = this.chores.findIndex(chore => chore.id === choreId);
+                if (choreIndex === -1) return;
+                const chore = this.chores[choreIndex];
+                this.chores.splice(choreIndex, 1);
+                saveData();
+                showToast(`Deleted pending chore: ${chore.title}`, 'info');
+            }
         };
 
         function escapeHtml(value) {
@@ -559,6 +778,7 @@
         function loadData() {
             try {
                 const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+
                 if (saved && Array.isArray(saved.profiles) && saved.profiles.length) {
                     app.profiles = saved.profiles.map((profile, index) => ({
                         id: profile.id || `profile_${Date.now()}_${index}`,
@@ -580,6 +800,7 @@
                         redeemedPrizes: Array.isArray(saved.redeemedPrizes) ? saved.redeemedPrizes : [],
                         customPrizes: Array.isArray(saved.customPrizes) ? saved.customPrizes : []
                     };
+
                     app.profiles = [{
                         id: `profile_${Date.now()}`,
                         name: 'Kid 1',
@@ -598,15 +819,6 @@
             } catch (error) {
                 console.warn('Could not parse stored data; resetting.', error);
                 ensureDefaultProfile();
-            }
-
-            const active = getActiveProfile();
-            if (active) {
-                app.points = clampNumber(active.points || 0, 0, 100000);
-                app.parentEmail = normalizeEmail(active.parentEmail || null);
-                app.chores = Array.isArray(active.chores) ? active.chores : [];
-                app.redeemedPrizes = Array.isArray(active.redeemedPrizes) ? active.redeemedPrizes : [];
-                app.customPrizes = Array.isArray(active.customPrizes) ? active.customPrizes : [];
             }
 
             const parentInput = document.getElementById('parent-email-input');
@@ -669,7 +881,7 @@
                 profileTabs.innerHTML = app.profiles.map((profile) => {
                     const isActive = profile.id === app.activeProfileId;
                     return `
-                        <button type="button" data-profile-id="${profile.id}" class="flex items-center gap-2 rounded-full px-4 py-2 ${isActive ? 'bg-white/25 ring-2 ring-yellow-200' : 'bg-white/10'} border border-white/20 text-sm font-semibold">
+                        <button type="button" data-profile-id="${profile.id}" class="flex items-center gap-2 rounded-full px-4 py-2 ${isActive ? 'bg-white/25 ring-2 ring-yellow-200' : 'bg-white/10'}">
                             <span class="w-7 h-7 rounded-full ${profile.color || DEFAULT_COLORS[0]} text-gray-800 flex items-center justify-center font-bold text-xs">${escapeHtml((profile.name || 'K').charAt(0).toUpperCase())}</span>
                             <span>${escapeHtml(profile.name || 'Kid')}</span>
                         </button>
@@ -718,18 +930,13 @@
             }
         }
 
-        function updateUI() {
-            renderProfiles();
-            document.getElementById('home-points-display').textContent = app.points;
-            document.getElementById('chores-points-display').textContent = `${app.points} pts`;
-            document.getElementById('prizes-points-display').textContent = app.points;
-            renderChores();
-            renderPrizes();
-            renderRedeemedPrizes();
-            renderStats();
-        }
-
         function renderStats() {
+            const dueSoonEl = document.getElementById('stats-due-soon');
+            const recurringEl = document.getElementById('stats-recurring');
+            const bestStreakEl = document.getElementById('stats-best-streak');
+
+            if (!dueSoonEl || !recurringEl || !bestStreakEl) return;
+
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -743,9 +950,9 @@
             const recurring = app.chores.filter(chore => chore.repeat && chore.repeat !== 'none').length;
             const bestStreak = app.chores.reduce((highest, chore) => Math.max(highest, Number(chore.streakCount) || 0), 0);
 
-            document.getElementById('stats-due-soon').textContent = dueSoon;
-            document.getElementById('stats-recurring').textContent = recurring;
-            document.getElementById('stats-best-streak').textContent = `${bestStreak} day${bestStreak === 1 ? '' : 's'}`;
+            dueSoonEl.textContent = dueSoon;
+            recurringEl.textContent = recurring;
+            bestStreakEl.textContent = `${bestStreak} day${bestStreak === 1 ? '' : 's'}`;
         }
 
         function renderChores() {
@@ -757,7 +964,7 @@
                 return;
             }
 
-            container.innerHTML = app.chores.map(chore => {
+            container.innerHTML = app.chores.map((chore) => {
                 const statusText = chore.status === 'pending_approval' ? 'Pending parent approval' : 'Ready to complete';
                 return `
                     <div class="rounded-2xl border border-white/15 bg-white/5 p-4 mb-4">
@@ -777,8 +984,8 @@
                             <div class="text-xs text-gray-300">${getDueLabel(chore.dueDate)}</div>
                             <div class="flex gap-2">
                                 ${chore.status === 'pending_approval'
-                                    ? `<button type="button" data-action="delete-pending" data-id="${chore.id}" class="bg-red-500/25 border border-red-300/40 text-red-100 rounded-lg px-3 py-2 text-sm font-semibold">Delete</button>`
-                                    : `<button type="button" data-action="complete" data-id="${chore.id}" data-title="${escapeHtml(chore.title)}" data-points="${chore.points}" class="bg-green-500/25 border border-green-300/40 text-green-100 rounded-lg px-3 py-2 text-sm font-semibold">Finish & Send Request</button>`}
+                                    ? `<button type="button" data-action="delete-pending" data-id="${chore.id}" class="bg-red-500/25 border border-red-300/40 text-red-100 rounded-lg px-3 py-2 text-sm">Delete</button>`
+                                    : `<button type="button" data-action="complete" data-id="${chore.id}" data-title="${escapeHtml(chore.title)}" data-points="${chore.points}" class="bg-green-500/25 border border-green-300/40 text-green-100 rounded-lg px-3 py-2 text-sm">Submit</button>`}
                             </div>
                         </div>
                     </div>
@@ -843,7 +1050,7 @@
                 return;
             }
 
-            container.innerHTML = app.redeemedPrizes.map((prize) => `
+            container.innerHTML = app.redeemedPrizes.map(prize => `
                 <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
                     <div class="flex items-center gap-3 mb-3">
                         <div class="w-10 h-10 rounded-xl ${prize.color || 'bg-emerald-500'} flex items-center justify-center">
@@ -859,264 +1066,38 @@
             `).join('');
         }
 
-        function addChore() {
-            const titleInput = document.getElementById('new-chore-title');
-            const pointsInput = document.getElementById('new-chore-points');
-            const categoryInput = document.getElementById('new-chore-category');
-            const dueDateInput = document.getElementById('new-chore-due-date');
-            const repeatInput = document.getElementById('new-chore-repeat');
+        function updateUI() {
+            renderProfiles();
+            const homePoints = document.getElementById('home-points-display');
+            const choresPoints = document.getElementById('chores-points-display');
+            const prizesPoints = document.getElementById('prizes-points-display');
 
-            const title = sanitizeText(titleInput ? titleInput.value : '', 120);
-            const points = clampNumber(pointsInput ? Number(pointsInput.value) : 0, 0, 5000);
-            const category = normalizeCategory(categoryInput ? categoryInput.value : 'General');
-            const dueDate = dueDateInput ? getDateString(dueDateInput.value) : '';
-            const repeat = normalizeRepeat(repeatInput ? repeatInput.value : 'none');
+            if (homePoints) homePoints.textContent = app.points;
+            if (choresPoints) choresPoints.textContent = `${app.points} pts`;
+            if (prizesPoints) prizesPoints.textContent = app.points;
 
-            if (!title || points <= 0) {
-                showToast('Please enter a chore and a valid point value.', 'error');
-                return;
+            renderChores();
+            renderPrizes();
+            renderRedeemedPrizes();
+            renderStats();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 700);
             }
 
-            app.chores.unshift({
-                id: `chore_${Date.now()}`,
-                title,
-                points,
-                category,
-                dueDate,
-                repeat,
-                status: 'active',
-                completionHistory: [],
-                streakCount: 0,
-                lastCompletedAt: null,
-                timestamp: Date.now()
-            });
-
-            if (titleInput) titleInput.value = '';
-            if (pointsInput) pointsInput.value = '';
-            if (categoryInput) categoryInput.value = 'General';
-            if (dueDateInput) dueDateInput.value = '';
-            if (repeatInput) repeatInput.value = 'none';
-
-            saveData();
-            showToast(`Added chore: ${title}`, 'success');
-        }
-
-        function addPrize() {
-            const titleInput = document.getElementById('new-prize-title');
-            const costInput = document.getElementById('new-prize-cost');
-
-            const title = sanitizeText(titleInput ? titleInput.value : '', 120);
-            const cost = clampNumber(costInput ? Number(costInput.value) : 0, 0, 100000);
-
-            if (!title || cost <= 0) {
-                showToast('Please enter a prize name and cost.', 'error');
-                return;
+            const onboardingModal = document.getElementById('email-onboarding-modal');
+            if (onboardingModal && !app.parentEmail) {
+                onboardingModal.classList.remove('hidden');
             }
 
-            app.customPrizes.unshift({
-                id: `custom_prize_${Date.now()}`,
-                title,
-                cost,
-                icon: 'fa-gift',
-                color: 'bg-emerald-500'
-            });
-
-            if (titleInput) titleInput.value = '';
-            if (costInput) costInput.value = '';
-
-            saveData();
-            showToast(`Added prize: ${title}`, 'success');
-        }
-
-        function redeemPrize(prize) {
-            if (!prize) return;
-            if (app.points < Number(prize.cost || 0)) {
-                showToast('Not enough points for that reward yet.', 'info');
-                return;
-            }
-
-            const confirmed = window.confirm(`Redeem "${prize.title}" for ${prize.cost} points?`);
-            if (!confirmed) return;
-
-            app.points -= Number(prize.cost || 0);
-            app.redeemedPrizes.unshift({
-                ...prize,
-                timestamp: Date.now()
-            });
-            saveData();
-            showToast(`${prize.title} redeemed!`, 'success');
-        }
-
-        function completeChore(choreId, title, points) {
-            if (!app.parentEmail) {
-                const settings = document.getElementById('view-etc');
-                settings && settings.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                document.getElementById('parent-email-input')?.focus();
-                showToast('Save a parent email before submitting a chore for approval.', 'info');
-                return;
-            }
-
-            const confirmed = window.confirm(`Submit "${title}" for approval and send a request for ${points} points?`);
-            if (!confirmed) return;
-
-            const choreIndex = app.chores.findIndex(chore => chore.id === choreId);
-            if (choreIndex === -1) return;
-
-            app.chores[choreIndex].status = 'pending_approval';
-            saveData();
-            showToast(`Submitted for approval: ${title}`, 'info');
-        }
-
-        function deletePendingChore(choreId) {
-            const choreIndex = app.chores.findIndex(chore => chore.id === choreId);
-            if (choreIndex === -1) return;
-            const chore = app.chores[choreIndex];
-            app.chores.splice(choreIndex, 1);
-            saveData();
-            showToast(`Deleted pending chore: ${chore.title}`, 'info');
-        }
-
-        function handleParentApproval(choreId, points) {
-            if (!choreId || !points || Number(points) <= 0) return;
-            const choreIndex = app.chores.findIndex(chore => chore.id === choreId);
-            if (choreIndex === -1) return;
-
-            const chore = app.chores[choreIndex];
-            app.chores.splice(choreIndex, 1);
-            app.points += Number(points);
-            saveData();
-            showToast(`Approved: ${chore.title} +${points} pts`, 'success');
-        }
-
-        function saveParentEmail(event) {
-            if (event) event.preventDefault();
-            const input = document.getElementById('parent-email-input');
-            const email = normalizeEmail(input ? input.value : '');
-            if (!email || !email.includes('@')) {
-                showToast('Please enter a valid parent email.', 'error');
-                return;
-            }
-            app.parentEmail = email;
-            saveData();
-            document.getElementById('onboarding-email-input') && (document.getElementById('onboarding-email-input').value = email);
-            showToast('Parent email saved.', 'success');
-        }
-
-        function submitInitialParentEmail(event) {
-            if (event) event.preventDefault();
-            const input = document.getElementById('onboarding-email-input');
-            const email = normalizeEmail(input ? input.value : '');
-            if (!email || !email.includes('@')) {
-                showToast('Please enter a valid email address.', 'error');
-                return;
-            }
-            app.parentEmail = email;
-            const parentInput = document.getElementById('parent-email-input');
-            if (parentInput) parentInput.value = email;
-            const modal = document.getElementById('email-onboarding-modal');
-            if (modal) modal.classList.add('hidden');
-            saveData();
-            showToast('You are all set.', 'success');
-        }
-
-        function addChildProfile(event) {
-            if (event) event.preventDefault();
-            const input = document.getElementById('new-child-name');
-            const name = sanitizeText(input ? input.value : '', 30);
-            if (!name) {
-                showToast('Enter a child name first.', 'error');
-                return;
-            }
-
-            const profile = {
-                id: `profile_${Date.now()}`,
-                name,
-                color: DEFAULT_COLORS[app.profiles.length % DEFAULT_COLORS.length],
-                points: 0,
-                parentEmail: null,
-                chores: [],
-                redeemedPrizes: [],
-                customPrizes: []
-            };
-
-            app.profiles.push(profile);
-            app.activeProfileId = profile.id;
-            syncActiveProfileState();
-            saveData();
-            if (input) input.value = '';
-            showToast(`${name} profile added.`, 'success');
-        }
-
-        function deleteChildProfile(profileId) {
-            if (app.profiles.length <= 1) {
-                showToast('You need at least one child profile.', 'info');
-                return;
-            }
-
-            const target = app.profiles.find(profile => profile.id === profileId);
-            if (!target) return;
-
-            const confirmed = window.confirm(`Delete profile "${target.name}"?`);
-            if (!confirmed) return;
-
-            app.profiles = app.profiles.filter(profile => profile.id !== profileId);
-            app.activeProfileId = app.profiles[0].id;
-            syncActiveProfileState();
-            saveData();
-            showToast(`${target.name} was removed.`, 'info');
-        }
-
-        function addSuggestedBatch() {
-            const suggestions = [
-                { title: 'Make the Bed', points: 15 },
-                { title: 'Put Away Toys', points: 20 },
-                { title: 'Sweep the Porch', points: 18 },
-                { title: 'Water the Plants', points: 12 },
-                { title: 'Feed the Pets', points: 10 }
-            ];
-
-            suggestions.forEach(item => {
-                app.chores.unshift({
-                    id: `chore_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-                    title: item.title,
-                    points: item.points,
-                    category: 'General',
-                    dueDate: '',
-                    repeat: 'none',
-                    status: 'active',
-                    completionHistory: [],
-                    streakCount: 0,
-                    lastCompletedAt: null,
-                    timestamp: Date.now()
-                });
-            });
-
-            saveData();
-            showToast('A fun chore pack was added.', 'success');
-        }
-
-        function init() {
             loadData();
-
-            const params = new URLSearchParams(window.location.search);
-            const choreId = params.get('approve_chore');
-            const pts = Number(params.get('pts'));
-            if (choreId && Number.isFinite(pts) && pts > 0) {
-                handleParentApproval(choreId, pts);
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-
-            setTimeout(() => {
-                const overlay = document.getElementById('loading-overlay');
-                if (overlay) overlay.style.display = 'none';
-                if (!app.parentEmail) {
-                    const modal = document.getElementById('email-onboarding-modal');
-                    if (modal) modal.classList.remove('hidden');
-                }
-            }, 120);
-        }
-
-        document.addEventListener('DOMContentLoaded', init);
+            updateUI();
+        });
     </script>
 </body>
 </html>
