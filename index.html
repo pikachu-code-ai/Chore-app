@@ -456,6 +456,11 @@
             ]
         };
 
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
         function escapeHtml(value) {
             return String(value ?? '')
                 .replace(/&/g, '&amp;')
@@ -745,9 +750,15 @@
             const recurring = app.chores.filter(chore => chore.repeat && chore.repeat !== 'none').length;
             const bestStreak = app.chores.reduce((highest, chore) => Math.max(highest, Number(chore.streakCount) || 0), 0);
 
-            document.getElementById('stats-due-soon').textContent = dueSoon;
-            document.getElementById('stats-recurring').textContent = recurring;
-            document.getElementById('stats-best-streak').textContent = `${bestStreak} day${bestStreak === 1 ? '' : 's'}`;
+            // Added safety checks here so it doesn't crash the loader
+            const elDueSoon = document.getElementById('stats-due-soon');
+            if (elDueSoon) elDueSoon.textContent = dueSoon;
+            
+            const elRecurring = document.getElementById('stats-recurring');
+            if (elRecurring) elRecurring.textContent = recurring;
+            
+            const elBestStreak = document.getElementById('stats-best-streak');
+            if (elBestStreak) elBestStreak.textContent = `${bestStreak} day${bestStreak === 1 ? '' : 's'}`;
         }
 
         function renderChores() {
@@ -949,6 +960,7 @@
             showToast(`${prize.title} redeemed!`, 'success');
         }
 
+        // Restored your magic link code here!
         function completeChore(choreId, title, points) {
             if (!app.parentEmail) {
                 const settings = document.getElementById('view-etc');
@@ -966,6 +978,17 @@
 
             app.chores[choreIndex].status = 'pending_approval';
             saveData();
+            
+            // Generate Magic Link
+            const activeProfile = getActiveProfile();
+            const childName = activeProfile ? activeProfile.name : 'Your child';
+            const magicLink = `${window.location.origin}${window.location.pathname}?approve_chore=${choreId}&pts=${points}`;
+            
+            const subject = encodeURIComponent(`${childName} finished a chore: ${title}`);
+            const body = encodeURIComponent(`Hi!\n\n${childName} just finished the chore "${title}" for ${points} points.\n\nClick the magic link below to approve it and award the points:\n\n${magicLink}\n\nThanks!`);
+            
+            window.location.href = `mailto:${app.parentEmail}?subject=${subject}&body=${body}`;
+
             showToast(`Submitted for approval: ${title}`, 'info');
         }
 
@@ -1096,6 +1119,22 @@
             saveData();
             showToast('A fun chore pack was added.', 'success');
         }
+
+        // Attach all functions to the app object so your HTML buttons can access them
+        Object.assign(app, {
+            scrollToSection,
+            addChore,
+            addPrize,
+            redeemPrize,
+            completeChore,
+            deletePendingChore,
+            handleParentApproval,
+            saveParentEmail,
+            submitInitialParentEmail,
+            addChildProfile,
+            deleteChildProfile,
+            addSuggestedBatch
+        });
 
         function init() {
             loadData();
